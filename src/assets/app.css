@@ -1,0 +1,116 @@
+html {
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body{
+    margin: 0px;
+    padding: 0px;
+    background: linear-gradient(rgba(138, 172, 37, 0.3), rgba(70, 125, 7, 0.4));
+    /* background: linear-gradient(rgba(133,120,116, 1), rgba(81,76,74, 1)); */
+  }
+
+  #app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #2c3e50;
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .app-body{
+    flex-grow: 1;
+    margin: 15px 30px;
+  }
+  
+  div.app-card{
+      margin: auto;
+      margin-bottom: 20px;
+      width: calc(90vw-30px);
+      max-width: 600px;
+  
+      border-radius: 5px;
+      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  
+      padding: 15px;
+      background-color: white;
+  }
+  div.app-card.app-card-wide{
+    width: calc(90vw-30px);
+    max-width: 5000px;
+    min-width: 420px !important;
+    min-height: 80%;
+    margin-top: 0px;
+    /*overflow: auto;*/
+  }
+  div.app-card-header{
+      font-size: 1.1em;
+      font-weight: 600;
+  }
+  .app-info-bubble{
+    background-color: rgba(19, 19, 19, 0.1);
+    padding: 10px 15px;
+    border-radius: 5px;
+  }
+  form.app-form{
+      margin-top: 50px;
+  }
+  div.app-form-row{
+    margin-top: 35px;
+  }
+  div.app-form-row > * {
+      display: block;
+      width: 95%;
+      margin: 10px;
+      font-size: 1.1em;
+  }
+  div.app-form-row input{
+      border: 0px;
+      border-bottom: 1px solid #ddd;
+      outline: none;
+  }
+  div.app-form-row input:focus{
+    border-bottom: 1px solid #A9C23F;
+  }
+  div.app-form-row input.app-input-error, div.app-form-row input:focus.app-input-error{
+    border-bottom: 1px solid #cc421c;
+  }
+  div.app-form-row button{
+      background-color: #A9C23F;
+      border: 0px;
+      border-radius: 3px;
+      padding: 10px;
+      margin-top: 40px;
+      cursor: pointer;
+      color: white;
+  }
+  div.app-form-row button:hover{
+      background-color: #b9d63b;
+  }
+  div.app-form-row button:disabled{
+      background-color: #7b8742;
+  }
+  div.app-form-row button > *{
+    vertical-align: middle;
+    margin:5px;
+  }
+  .disp-flex-row{
+    display: flex;
+    align-items: center;
+  }
+  .disp-flex-grow{
+    flex-grow: 1;
+  }
+  .disp-icon-big{
+    font-size: 1.4em;
+  }
+  .disp-app-font{
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+  }
+  .disp-app-font *{
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+  }
