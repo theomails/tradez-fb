@@ -57,6 +57,11 @@ export default {
 <style>
   @import './assets/app.css';
 </style>
+<style scoped>
+span {
+  font-size: 11pt;
+}
+</style>
 <style>
 .app-header{
   padding: 30px 30px 15px 30px;
@@ -145,5 +150,8 @@ html, body{
 }
 .func-flex-grow{
     flex: 1;
+}
+input:disabled {
+  color: #666;
 }
 </style>

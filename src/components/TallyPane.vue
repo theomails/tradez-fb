@@ -1,5 +1,5 @@
 <template>
-    <div class="my-tally-pane" v-show="gameState.status=='SHOW_TALLY'">
+    <div class="my-tally-pane" v-if="gameState && gameState.status=='SHOW_TALLY'">
         <div class="my-tally-popup func-popup">
             <div class="func-popup-title">
                 Game Tally!
@@ -33,7 +33,7 @@ export default{
     },
     methods:{
         onClose(){
-            eventBus.$emit('tallyClosed');
+            eventBus.emit('tallyClosed');
         }
     },
     components: {

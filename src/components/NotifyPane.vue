@@ -19,7 +19,7 @@ export default{
         };
     },
     mounted(){
-        eventBus.$on('postMessage', this.postMessage);
+        eventBus.on('postMessage', this.postMessage);
     },
     methods:{
         postMessage(msgData){

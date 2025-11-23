@@ -24,16 +24,16 @@ export default {
     },
     methods:{
         onAddPlayerClick(){
-            eventBus.$emit('addPlayerClicked');
+            eventBus.emit('addPlayerClicked');
         },
         onStartGame(){
-            eventBus.$emit('startGameClicked');
+            eventBus.emit('startGameClicked');
         },
         onShowTally(){
-            eventBus.$emit('showTallyClicked');
+            eventBus.emit('showTallyClicked');
         },
         onResetGame(){
-            eventBus.$emit('resetGameClicked');
+            eventBus.emit('resetGameClicked');
         }
     },
     computed:{

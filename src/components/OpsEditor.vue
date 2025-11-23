@@ -18,14 +18,14 @@ export default {
             var nowCount = this.neatOps[denom] || 0;
             if(nowCount <= 0) return; //Can't go below 0
 
-            this.$emit('decrement', denom);
+            this.$emit('decrement', {denom});
         },
         onIncrClick(denom){
             var notes = this.bagWrapper.bag[denom] || 0;
             var nowCount = this.neatOps[denom] || 0;
             if(nowCount >= notes) return; //Can't exceed
 
-            this.$emit('increment', denom);
+            this.$emit('increment', {denom});
         }
     }
 }

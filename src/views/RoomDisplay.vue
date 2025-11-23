@@ -1,6 +1,6 @@
 <template>
-    <div class="app-card app-card-wide app-pp-page">
-        <GameBoard :roomObj="roomFromDb" :localUser />
+    <div class="app-whole-screen app-pp-page">
+        <GameBoard v-if="roomFromDb" :roomObj="roomFromDb" :localUser="localUser" />
     </div>
 </template>
 <script>
@@ -11,7 +11,8 @@ export default{
     props: ["roomId"],
     data(){
         return {
-            roomFromDb: null
+            roomFromDb: null,
+            localUser: null
         }
     },
     methods:{
@@ -32,7 +33,7 @@ export default{
                     this.roomFromDb = await dbservice.getRoomAfterJoining(this.roomId, this.localUser);
                     
                     //Add a listener hook
-                    dbservice.listenToRoom(roomObj, this.onRoomSnapshot);
+                    dbservice.listenToRoom(roomObj.roomId, this.onRoomSnapshot);
                 }else{
                     this.$notify({
                         message: 'Unable to find a matching room. Please check the link. Redirecting...',
@@ -55,30 +56,30 @@ export default{
         }
     },
     watch:{
-        roomId(){
+        async roomId(){
             //Async-Wait
             this.$Progress.start();
             await this.checkAndLoadRoom();
             this.$Progress.finish();
         }
     },
-    computed:{
-        localUser(){
-            return dbservice.getAndSyncLocalUser();
-        }
-    },
     async mounted(){
         //Check user exists, or go to login
+        this.localUser = await dbservice.getAndSyncLocalUser();
         let userName = this.localUser?.userName;
         if(!userName){
             this.$router.push( {name:'login', query:{forwardToRoomId:this.roomId}} );
             return;
         }
 
-        //Async-Wait
-        this.$Progress.start();
-        await this.checkAndLoadRoom();
-        this.$Progress.finish();
+        try{
+            //Async-Wait
+            this.$Progress.start();
+            await this.checkAndLoadRoom();
+            this.$Progress.finish();
+        } catch (err) {
+            console.log(err);
+        }
     },
     components:{
         GameBoard
@@ -89,5 +90,14 @@ export default{
 .app-pp-page{
     user-select: none;
 }
-
+.app-whole-screen{
+    position: absolute;
+    top: 0;
+    left:0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #fee;
+    z-index: 1000;
+    font-size: 1em;
+}
 </style>

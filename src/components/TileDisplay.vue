@@ -16,13 +16,13 @@ export default{
     props: ["gameState"],
     methods:{
         onJumpHereClick(){
-            eventBus.$emit('jumpHereClicked');
+            eventBus.emit('jumpHereClicked');
         },
         onBuyTileClick(){
-            eventBus.$emit('buyTileClicked');
+            eventBus.emit('buyTileClicked');
         },
         onAddBoothClick(){
-            eventBus.$emit('addBoothClicked');
+            eventBus.emit('addBoothClicked');
         }
     },
     components:{

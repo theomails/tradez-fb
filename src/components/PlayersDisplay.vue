@@ -36,13 +36,13 @@ export default{
     props: ["gameState", "gameData"],
     methods:{
         onPlayerClick(player){
-            eventBus.$emit('playerClicked', player);
+            eventBus.emit('playerClicked', {player});
         },
         onRollClick(){
-            eventBus.$emit('playerRollClicked');
+            eventBus.emit('playerRollClicked');
         },
         onMoveClick(){
-            eventBus.$emit('playerMoveClicked');
+            eventBus.emit('playerMoveClicked');
         },
         isSelectedPlayer(aPlayer){
             return aPlayer && this.gameState.selectedPlayer && (aPlayer.id == this.gameState.selectedPlayer.id);

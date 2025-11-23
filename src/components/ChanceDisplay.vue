@@ -18,10 +18,10 @@ export default{
     props: ["gameState"],
     methods:{
         onPickCardClick(){
-            eventBus.$emit('pickCardClicked');
+            eventBus.emit('pickCardClicked');
         },
         onCloseCardClick(){
-            eventBus.$emit('cardCloseClicked');
+            eventBus.emit('cardCloseClicked');
         }
     },
     components:{

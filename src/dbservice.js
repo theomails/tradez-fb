@@ -1,10 +1,11 @@
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import db from '@/firebase.js';
 import data from './data.js';
+import money from './money.js';
 
 export default {
     getNewRandomPart(){
-        return parseInt(Math.random() * 10_000, 10);
+        return parseInt(Math.random() * 10000, 10);
     },
     createOrUpdateLocalUser(userName){
         console.log('DB SERVICE :: createLocalUser ' + userName);
@@ -41,9 +42,9 @@ export default {
         return userObj;
     },
     async createRoom(){
-        console.log('DB SERVICE :: creatRoom ');
+        console.log('DB SERVICE :: createRoom ');
         let roomId = this.getNewRandomPart() + "-" + Date.now();
-        let localUser = this.getLocalUser();
+        let localUser = this.getAndSyncLocalUser();
         let roomName = `${localUser.userName}'s Room`;
 
         let roomObj = { roomId, 
@@ -108,18 +109,18 @@ export default {
         }
     },
     /** RISKIEST OP.. Whole game state is controlled from client side on any players' machine */
-    async updateGameInRoom(roomObj, gameState){
-        console.log('DB SERVICE :: updateGameInRoom roomObj.roomId ' + roomObj.roomId );
+    async updateGameInRoom(roomId, gameState){
+        console.log('DB SERVICE :: updateGameInRoom roomId ' + roomId );
         
         //Assign necessary
         let partRoomObj = {};
         partRoomObj.gameState = gameState;
         
         //Save by merge, wait
-        await setDoc(doc(db, 'rooms', roomObj.roomId), partRoomObj, { merge: true });
+        await setDoc(doc(db, 'rooms', roomId), partRoomObj, { merge: true });
     },
     async updateNotificationsInRoom(roomId, notifications){
-        console.log('DB SERVICE :: updateNotificationsInRoom roomObj.roomId ' + roomObj.roomId );
+        console.log('DB SERVICE :: updateNotificationsInRoom roomId ' + roomId );
         
         //Assign necessary
         let partRoomObj = {};
@@ -129,7 +130,6 @@ export default {
         await setDoc(doc(db, 'rooms', roomId), partRoomObj, { merge: true });
     },
     listenToRoom(roomId, roomChangeCallback){
-        console.log(roomChangeCallback);
         onSnapshot(doc(db, 'rooms', roomId), (snap) => {
             roomChangeCallback(snap.data());
           });

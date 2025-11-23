@@ -1,5 +1,5 @@
 <template>
-    <div class="my-add-player-pane" v-show="gameState.status=='ADD_PLAYER'">
+    <div class="my-add-player-pane" v-show="gameState && gameState.status=='ADD_PLAYER'">
         <div class="my-add-player-popup func-popup">
             <div class="func-popup-title">
                 Add Player
@@ -71,7 +71,7 @@ export default{
                 this.playerNameError = 'Please enter a player name!';
                 return;
             }
-            eventBus.$emit('playerAdded', this.playerName, this.playerColor);
+            eventBus.emit('playerAdded', {playerName:this.playerName, playerColor:this.playerColor});
             this.playerName = '';
             this.playerColor = this.pastelColors[0];
             this.$nextTick(()=>{
@@ -81,7 +81,7 @@ export default{
             });
         },
         onCancelAddPlayer(){
-            eventBus.$emit('addPlayerCancelled');
+            eventBus.emit('addPlayerCancelled');
         }
     }
 }

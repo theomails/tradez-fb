@@ -1,26 +1,26 @@
 <template>
-    <div class="my-game-board">
-        <AddPlayerPane :gameState="gameState"></AddPlayerPane>
-        <TallyPane :gameState="gameState" :gameData="gameData"></TallyPane>
+    <div class="my-game-board" v-if="localGameState">
+        <AddPlayerPane :gameState="localGameState"></AddPlayerPane>
+        <TallyPane :gameState="localGameState" :gameData="gameData"></TallyPane>
         <div class="my-gb-top">
-            <TileStrip direction="horizontal" :gameData="gameData" :gameState="gameState" 
+            <TileStrip direction="horizontal" :gameData="gameData" :gameState="localGameState" 
                 :fromTileIdx="16" :toTileIdx="26"></TileStrip>
         </div>
         <div class="my-gb-middle">
             <div class="my-gb-left">
-                <TileStrip direction="vertical" :gameData="gameData" :gameState="gameState" 
+                <TileStrip direction="vertical" :gameData="gameData" :gameState="localGameState" 
                     :fromTileIdx="15" :toTileIdx="11"></TileStrip>
             </div>
             <div class="my-gb-center">
-                <CenterPanels :gameState="gameState" :gameData="gameData"></CenterPanels>
+                <CenterPanels :gameState="localGameState" :gameData="gameData"></CenterPanels>
             </div>
             <div class="my-gb-right">
-                <TileStrip direction="vertical" :gameData="gameData" :gameState="gameState" 
+                <TileStrip direction="vertical" :gameData="gameData" :gameState="localGameState" 
                     :fromTileIdx="27" :toTileIdx="31"></TileStrip>
             </div>
         </div>
         <div class="my-gb-bottom">
-            <TileStrip direction="horizontal" :gameData="gameData" :gameState="gameState" 
+            <TileStrip direction="horizontal" :gameData="gameData" :gameState="localGameState" 
                 :fromTileIdx="10" :toTileIdx="0"></TileStrip>
         </div>
     </div>
@@ -32,6 +32,7 @@ import AddPlayerPane from './AddPlayerPane.vue';
 import TallyPane from './TallyPane.vue';
 import data from "@/data.js";
 import money from "@/money.js";
+import dbservice from '../dbservice';
 import {eventBus} from '@/main.js';
 
 export default {
@@ -48,62 +49,69 @@ export default {
     },
     methods:{
         movePlayerIdToTileId(playerId, tileId){
-            var playerToTileMap = this.clone(this.gameState.playerToTileMap); //Reactivity hack?
+            var playerToTileMap = this.clone(this.localGameState.playerToTileMap); //Reactivity hack?
             playerToTileMap[playerId] = tileId;
-            this.gameState.playerToTileMap = playerToTileMap;
+            this.localGameState.playerToTileMap = playerToTileMap;
 
-            var player = this.gameState.players.find(thisPlayer => { return thisPlayer.id == playerId });
+            var player = this.localGameState.players.find(thisPlayer => { return thisPlayer.id == playerId });
             var tile = this.gameData.allTiles.find(thisTile => { return thisTile.id == tileId });
             this.postMessage(`Player ${player.name} moved to tile ${tile.name}.`);
         },
-        onPlayerClicked(player){
-            this.gameState.selectedPlayer = player;
+        onPlayerClicked({player}){
+            console.log('onPlayerClicked');
+            this.localGameState.selectedPlayer = player;
         },
         onPlayerRollClicked(){
-            this.gameState.currentRolledDice = (Math.floor(Math.random() * 6) + 1);
-            this.postMessage(`Player ${this.gameState.selectedPlayer.name} rolled a ${this.gameState.currentRolledDice}.`);
+            console.log('onPlayerRollClicked');
+            this.localGameState.currentRolledDice = (Math.floor(Math.random() * 6) + 1);
+            this.postMessage(`Player ${this.localGameState.selectedPlayer.name} rolled a ${this.localGameState.currentRolledDice}.`);
         },
         onPlayerMoveClicked(){
+            console.log('onPlayerMoveClicked');
             //Grab
-            var rolledVal = this.gameState.currentRolledDice;
-            this.gameState.currentRolledDice = null;
+            var rolledVal = this.localGameState.currentRolledDice;
+            this.localGameState.currentRolledDice = null;
             //Find player id
-            var selPlayerId = this.gameState.selectedPlayer.id;
+            var selPlayerId = this.localGameState.selectedPlayer.id;
             //Find tile
-            var tileIdOfPlayer = this.gameState.playerToTileMap[this.gameState.selectedPlayer.id];
-            var tile = this.gameData.allTiles.find(thisTile => { return thisTile.id == tileIdOfPlayer });
-            var tileIdx = this.gameData.allTiles.indexOf(tile);
+            var tileIdOfPlayer = this.localGameState.playerToTileMap[this.localGameState.selectedPlayer.id];
+            var tile = this.localGameData.allTiles.find(thisTile => { return thisTile.id == tileIdOfPlayer });
+            var tileIdx = this.localGameData.allTiles.indexOf(tile);
             //Calc next tile idx
-            var nextTileIdx = (tileIdx + rolledVal) % this.gameData.allTiles.length;
+            var nextTileIdx = (tileIdx + rolledVal) % this.localGameData.allTiles.length;
             //Assign values
-            this.gameState.selectedTile = this.gameData.allTiles[nextTileIdx];
-            this.movePlayerIdToTileId(selPlayerId, this.gameState.selectedTile.id);
+            this.localGameState.selectedTile = this.localGameData.allTiles[nextTileIdx];
+            this.movePlayerIdToTileId(selPlayerId, this.localGameState.selectedTile.id);
         },
         onPickCardClicked(){
-            var availableChanceCards = this.gameState.availableChanceCards;
+            console.log('onPickCardClicked')
+            var availableChanceCards = this.localGameState.availableChanceCards;
             var pickedIdx = Math.floor(Math.random() * (availableChanceCards.length - 0.01));
             var cards = availableChanceCards.splice(pickedIdx, 1);
-            this.gameState.selectedChanceCard = cards[0];
-            this.gameState.availableChanceCards = availableChanceCards;
-            this.postMessage(`Player ${this.gameState.selectedPlayer.name} picked chance card: ${this.gameState.selectedChanceCard}.`);
+            this.localGameState.selectedChanceCard = cards[0];
+            this.localGameState.availableChanceCards = availableChanceCards;
+            this.postMessage(`Player ${this.localGameState.selectedPlayer.name} picked chance card: ${this.localGameState.selectedChanceCard}.`);
         },
         onCloseCardClicked(){
-            this.gameState.selectedChanceCard = null;
+            console.log('onCloseCardClicked');
+            this.localGameState.selectedChanceCard = null;
         },
-        onTileClicked(tileId){
-            var tile = this.gameData.allTiles.find(thisTile => { return thisTile.id == tileId });
-            this.gameState.selectedTile = tile;
+        onTileClicked({tileId}){
+            console.log('onTileClicked');
+            var tile = this.localGameData.allTiles.find(thisTile => { return thisTile.id == tileId });
+            this.localGameState.selectedTile = tile;
         },
         onJumpHereClicked(){
-            var tile = this.gameState.selectedTile;
-            var player = this.gameState.selectedPlayer;
+            console.log('onJumpHereClicked');
+            var tile = this.localGameState.selectedTile;
+            var player = this.localGameState.selectedPlayer;
             this.movePlayerIdToTileId(player.id, tile.id);
         },
-        onTransferClicked(fromBagWrapper, toBagWrapper, fromOps, toOps, summaryText){
-            console.log('Doing transfer');
-            this.runOpsAndSave(fromBagWrapper, toBagWrapper, fromOps);
-            this.runOpsAndSave(toBagWrapper, fromBagWrapper, toOps);
-            this.postMessage(`Transferred ${summaryText}.`);
+        onTransferClicked({fromBagOption, toBagOption, fromOps, toOps, transferSummaryText}){
+            console.log('onTransferClicked');
+            this.runOpsAndSave(fromBagOption, toBagOption, fromOps);
+            this.runOpsAndSave(toBagOption, fromBagOption, toOps);
+            this.postMessage(`Transferred ${transferSummaryText}.`);
         },
         runOpsAndSave(fromBagWrapper, toBagWrapper, ops){
             console.log(fromBagWrapper);
@@ -124,79 +132,86 @@ export default {
         updateBag(bagWrapper){
             if(bagWrapper.type=='bank'){
                 console.log('Update bank');
-                this.gameState.bankMoneyBag = this.clone(bagWrapper.bag);
+                this.localGameState.bankMoneyBag = this.clone(bagWrapper.bag);
             }else if(bagWrapper.type=='uncle'){
                 console.log('Update uncle');
-                this.gameState.uncleMoneyBag = this.clone(bagWrapper.bag);
+                this.localGameState.uncleMoneyBag = this.clone(bagWrapper.bag);
             }else{
-                var player = this.gameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
+                var player = this.localGameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
                 console.log('Update player');
                 player.moneyBag = this.clone(bagWrapper.bag);
             }
         },
         onBuyTileClicked(){
-            this.gameState.tileToOwnerMap[this.gameState.selectedTile.id] = this.gameState.selectedPlayer.id;
-            this.gameState.tileToOwnerMap = this.clone(this.gameState.tileToOwnerMap);
-            var player = this.gameState.selectedPlayer;
-            var tile = this.gameState.selectedTile;
+            console.log('onBuyTileClicked');
+            this.localGameState.tileToOwnerMap[this.localGameState.selectedTile.id] = this.localGameState.selectedPlayer.id;
+            this.localGameState.tileToOwnerMap = this.clone(this.localGameState.tileToOwnerMap);
+            var player = this.localGameState.selectedPlayer;
+            var tile = this.localGameState.selectedTile;
             this.postMessage(`Player ${player.name} bought tile ${tile.name}!`);
         },
         onAddBoothClicked(){
-            var booths = this.gameState.tileToBoothMap[this.gameState.selectedTile.id] || 0;
+            console.log('onAddBoothClicked');
+            var booths = this.localGameState.tileToBoothMap[this.localGameState.selectedTile.id] || 0;
             if(booths >= 2) return;
 
-            this.gameState.tileToBoothMap[this.gameState.selectedTile.id] = booths + 1;
-            this.gameState.tileToBoothMap = this.clone(this.gameState.tileToBoothMap);
-            var player = this.gameState.selectedPlayer;
-            var tile = this.gameState.selectedTile;
+            this.localGameState.tileToBoothMap[this.localGameState.selectedTile.id] = booths + 1;
+            this.localGameState.tileToBoothMap = this.clone(this.localGameState.tileToBoothMap);
+            var player = this.localGameState.selectedPlayer;
+            var tile = this.localGameState.selectedTile;
             this.postMessage(`Player ${player.name} added booth on tile ${tile.name}!`);
         },
         onAddPlayerClicked(){
-            this.gameState.status = 'ADD_PLAYER';
+            console.log('onAddPlayerClicked');
+            this.localGameState.status = 'ADD_PLAYER';
         },
         onStartGameClicked(){
 
         },
         onShowTallyClicked(){
-            this.gameState.status = 'SHOW_TALLY';
+            console.log('onShowTallyClicked');
+            this.localGameState.status = 'SHOW_TALLY';
         },
         onTallyClosed(){
-            if(this.gameState.players.length < 2){
-                this.gameState.status = 'ADD_PLAYER';
+            console.log('onTallyClosed');
+            if(this.localGameState.players.length < 2){
+                this.localGameState.status = 'ADD_PLAYER';
             }else{
-                this.gameState.status = 'ACTIVE';
+                this.localGameState.status = 'ACTIVE';
             }
         },
-        onPlayerAdded(pname, pcolor){
-            if(pname != this.loginUser.userName){
-                pname = `${pname} (${this.loginUser.userName})`;
+        onPlayerAdded({playerName, playerColor}){
+            console.log('onPlayerAdded');
+            if(playerName != this.localUser.userName){
+                playerName = `${playerName} (${this.localUser.userName})`;
             }
             var player = {
-                id: this.loginUser.userId,
-                name: pname,
-                color: pcolor,
+                id: this.localUser.userId,
+                name: playerName,
+                color: playerColor,
                 moneyBag:  money.getDefaultPlayerMoneyBag()
             };
 
-            this.gameState.players.push(player);
-            this.gameState.players = this.clone(this.gameState.players);
+            this.localGameState.players.push(player);
+            this.localGameState.players = this.clone(this.localGameState.players);
             
-            this.gameState.playerToTileMap[player.id] = this.gameData.allTiles[0].id;
-            this.gameState.playerToTileMap = this.clone(this.gameState.playerToTileMap);
+            this.localGameState.playerToTileMap[player.id] = this.gameData.allTiles[0].id;
+            this.localGameState.playerToTileMap = this.clone(this.localGameState.playerToTileMap);
 
-            if(this.gameState.players.length==1){
-                this.gameState.selectedPlayer = this.gameState.players[0];
+            if(this.localGameState.players.length==1){
+                this.localGameState.selectedPlayer = this.localGameState.players[0];
             }
-            if(this.gameState.players.length < 2){
-                this.gameState.status = 'ADD_PLAYER';
+            if(this.localGameState.players.length < 2){
+                this.localGameState.status = 'ADD_PLAYER';
             }else{
-                this.gameState.status = 'ACTIVE';
+                this.localGameState.status = 'ACTIVE';
             }
             this.postMessage(`Player ${player.name} added.`);
         },
         onAddPlayerCancelled(){
-            if(this.gameState.players.length >= 2){
-                this.gameState.status = 'ACTIVE';
+            console.log('onAddPlayerCancelled');
+            if(this.localGameState.players.length >= 2){
+                this.localGameState.status = 'ACTIVE';
             }
         },
         postMessage(msg){
@@ -212,30 +227,32 @@ export default {
                     closeDelay: 4500
                 });
             
-            this.gameState.messages.unshift(msg);
+            this.localNotifications.unshift(msg);
         },
         clone(obj){
             return JSON.parse(JSON.stringify(obj));
         },
         async saveGameStateInDb(){
-            await updateGameInRoom(this.roomObj.roomId, this.localGameState);
+            await dbservice.updateGameInRoom(this.roomObj.roomId, this.localGameState);
         },
         async saveNotificationsInDb(){
-            await updateNotificationsInRoom(this.roomObj.roomId, this.localNotifications);
+            await dbservice.updateNotificationsInRoom(this.roomObj.roomId, this.localNotifications);
         },
         grabRoomFromProps(){
             this.localRoomObj = this.roomObj;
-            this.localGameState = this.localRoomObj.gameState;
-            this.localNotifications = this.localRoomObj.notifications;            
+            this.localGameState = this.localRoomObj?.gameState;
+            this.localNotifications = this.localRoomObj?.notifications;            
         },
         setupEventHandler(eventName, eventHandler){
-            eventBus.$on(eventName, async (...eventArgs)=>{
+            eventBus.on(eventName, async (eventArgs)=>{
                 let allowed = false;
+                console.log('Checking event..', eventName, eventArgs);
                 if(this.localGameState.selectedPlayer 
                     && this.localGameState.selectedPlayer.userId == this.localUser.userId){
                         allowed = true;
-                } else if(eventName=='addPlayerClicked') {
+                } else if(eventName=='playerAdded') {
                     let foundPlayer = this.localGameState.players.find(player => player.userId==this.localUser.userId);
+                    console.log('foundPlayer ', foundPlayer);
                     if(!foundPlayer){
                         allowed = true;
                     }
@@ -244,14 +261,16 @@ export default {
                         allowed = true;
                     }
                 } else if(eventName=='playerClicked') {
-                    const player = eventArgs[0];
+                    const player = eventArgs.player;
                     if(player.userId == this.localUser.userId){
                         allowed = true;
                     } 
                 }
 
                 if(allowed){
-                    eventHandler();
+                    console.log('Allowed..');
+                    eventHandler(eventArgs);
+                    console.log('Saving..');
                     await this.saveGameStateInDb();
                     await this.saveNotificationsInDb();
                 }
@@ -259,27 +278,31 @@ export default {
         }
     },
     mounted(){
-        setupEventHandler('playerClicked', this.onPlayerClicked);
-        setupEventHandler('playerRollClicked', this.onPlayerRollClicked);
-        setupEventHandler('playerMoveClicked', this.onPlayerMoveClicked);
-        setupEventHandler('pickCardClicked', this.onPickCardClicked);
-        setupEventHandler('cardCloseClicked', this.onCloseCardClicked);
-        setupEventHandler('tileClicked', this.onTileClicked);
-        setupEventHandler('jumpHereClicked', this.onJumpHereClicked);
-        setupEventHandler('transferClicked', this.onTransferClicked);
-        setupEventHandler('buyTileClicked', this.onBuyTileClicked);
-        setupEventHandler('addBoothClicked', this.onAddBoothClicked);
-        setupEventHandler('addPlayerClicked', this.onAddPlayerClicked); //Move them out of Game events
-        setupEventHandler('startGameClicked', this.onStartGameClicked);
-        setupEventHandler('showTallyClicked', this.onShowTallyClicked);
-        setupEventHandler('tallyClosed', this.onTallyClosed);
-        setupEventHandler('playerAdded', this.onPlayerAdded); //Move them out of Game events
-        setupEventHandler('addPlayerCancelled', this.onAddPlayerCancelled); //Move them out of Game events
+        try {
+            this.setupEventHandler('playerClicked', this.onPlayerClicked);
+            this.setupEventHandler('playerRollClicked', this.onPlayerRollClicked);
+            this.setupEventHandler('playerMoveClicked', this.onPlayerMoveClicked);
+            this.setupEventHandler('pickCardClicked', this.onPickCardClicked);
+            this.setupEventHandler('cardCloseClicked', this.onCloseCardClicked);
+            this.setupEventHandler('tileClicked', this.onTileClicked);
+            this.setupEventHandler('jumpHereClicked', this.onJumpHereClicked);
+            this.setupEventHandler('transferClicked', this.onTransferClicked);
+            this.setupEventHandler('buyTileClicked', this.onBuyTileClicked);
+            this.setupEventHandler('addBoothClicked', this.onAddBoothClicked);
+            this.setupEventHandler('addPlayerClicked', this.onAddPlayerClicked); //Move them out of Game events
+            this.setupEventHandler('startGameClicked', this.onStartGameClicked);
+            this.setupEventHandler('showTallyClicked', this.onShowTallyClicked);
+            this.setupEventHandler('tallyClosed', this.onTallyClosed);
+            this.setupEventHandler('playerAdded', this.onPlayerAdded); //Move them out of Game events
+            this.setupEventHandler('addPlayerCancelled', this.onAddPlayerCancelled); //Move them out of Game events
 
-        this.grabRoomFromProps();
-        if(this.localUser.userId == this.localRoomObj.owner.userId){
-            this.localGameState.status = 'ADD_PLAYER';
-            this.saveGameStateInDb();
+            this.grabRoomFromProps();
+            if(this.localUser.userId == this.localRoomObj?.owner?.userId){
+                this.localGameState.status = 'ADD_PLAYER';
+                this.saveGameStateInDb();
+            }            
+        } catch (err) {
+            console.log(err);
         }
     },
     components:{
@@ -287,6 +310,10 @@ export default {
         CenterPanels,
         AddPlayerPane,
         TallyPane
+    },
+    errorCaptured(err, vm, info) {
+        console.error('captured', err, info);
+        return false; // false to propagate
     }
 }
 </script>

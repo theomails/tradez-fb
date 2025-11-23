@@ -11,7 +11,7 @@
                 </div>
                 <div class="app-form-row">
                     <label>Your name (Room owner)</label>
-                    <input type="text" disabled :value="userName"/>
+                    <input type="text" name="ownerName" disabled :value="userName"/>
                 </div>
                 <div class="app-form-row">
                     <label>Game Room name</label>
@@ -39,19 +39,24 @@ export default {
     },
     methods:{
         async createRoom(){
-            //Create Room
-            this.$notify({
-                    message: 'Creating Room..',
-                    showClose: false,
-                    type:'success'
-                });
-            
-            this.$Progress.start();
-            let room = await dbservice.createRoom(this.teamName);
-            this.$Progress.finish();
+            try{
+                //Create Room
+                this.$notify({
+                        message: 'Creating Room..',
+                        showClose: false,
+                        type:'success'
+                    });
+                
+                this.$Progress.start();
+                let room = await dbservice.createRoom(this.teamName);
+                
+                this.$Progress.finish();
 
-            //Redirect
-            this.$router.push({name:'room', params:{roomId: room.roomId }});
+                //Redirect
+                this.$router.push({name:'room', params:{roomId: room.roomId }});
+            } catch (err){
+                console.log(err);
+            }
         }
     },
     computed:{
@@ -72,3 +77,11 @@ export default {
     }
 }
 </script>
+<style scoped>
+div, h1, h2, h3, h4{
+    font-size: 1.1em;
+}
+.app-card-header {
+    font-size: 12pt;
+}
+</style>

@@ -43,7 +43,7 @@ export default {
     },
     methods:{
         onTileClick(){
-            eventBus.$emit('tileClicked', this.tile?.id);
+            eventBus.emit('tileClicked', { tileId: this.tile?.id });
         },
         getTextColor(bgColor){
             if(this.darkColors.includes(bgColor)){

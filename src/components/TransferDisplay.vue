@@ -41,7 +41,7 @@ export default {
         this.toBagId = 'bank';
     },
     methods:{
-        perform(source, action, denom){
+        perform(source, action, {denom}){
             this.changeOpsBag(denom, action, source);
         }, 
         changeOpsBag(denom, incOrDec, opsFromOrTo){
@@ -72,10 +72,14 @@ export default {
             return sum;
         },
         onTransferClick(){
-            eventBus.$emit('transferClicked', 
-                this.getWrapperForBagId(this.fromBagId), this.getWrapperForBagId(this.toBagId), 
-                this.fromOps, this.toOps,
-                this.transferSummaryText);
+            let fromBagOption = this.getWrapperForBagId(this.fromBagId);
+            let toBagOption = this.getWrapperForBagId(this.toBagId)
+            eventBus.emit('transferClicked', 
+                {
+                    fromBagOption, toBagOption, 
+                    fromOps: this.fromOps, toOps: this.toOps,
+                    transferSummaryText: this.transferSummaryText
+                });
             this.fromOps = {};
             this.toOps = {};
         }
