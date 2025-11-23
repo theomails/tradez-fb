@@ -14,16 +14,14 @@
                     <input type="text" disabled :value="userName"/>
                 </div>
                 <div class="app-form-row">
-                    <label>Team name</label>
-                    <input ref="teamName" key="teamName" type="text" name="teamName" v-model="teamName" 
-                        @keydown.enter.prevent="createRoom"
-                        :class="{'app-input-error':!goodToCreateRoom}"
-                    />
+                    <label>Game Room name</label>
+                    <input ref="teamName" key="teamName" type="text" name="teamName" 
+                        v-model="teamName" disabled/>
                 </div>
                 <div class="app-form-row">
-                    <button @click.prevent="createRoom" :disabled="!goodToCreateRoom">
+                    <button ref="createButton" @click.prevent="createRoom" :disabled="!goodToCreateRoom">
                         <el-icon><CirclePlusFilled /></el-icon>
-                        <span>Create Room</span>
+                        <span>Create Room!</span>
                     </button>
                 </div>
             </form>
@@ -36,8 +34,7 @@ import dbservice from '@/dbservice.js'
 export default {
     data(){
         return {
-            userName:"",
-            teamName: ""
+            userName:""
         };
     },
     methods:{
@@ -60,14 +57,17 @@ export default {
     computed:{
         goodToCreateRoom(){
             return this.teamName && (this.teamName.length >= 4);
+        },
+        teamName(){
+            return `${this.userName}'s Room`;
         }
     },
     mounted(){
-        this.userName = dbservice.getLocalUser()?.userName;
+        this.userName = dbservice.getAndSyncLocalUser()?.userName;
         if(!this.userName){
             this.$router.push( {name:'login'} );
         }else{
-            this.$nextTick( ()=> this.$refs.teamName.focus() );
+            this.$nextTick( ()=> this.$refs.createButton.focus() );
         }
     }
 }

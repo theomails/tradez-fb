@@ -40,7 +40,7 @@ export default {
                     showClose: false,
                     type:'success'
                 });
-            dbservice.createLocalUser(this.userName);
+            dbservice.createOrUpdateLocalUser(this.userName);
 
             //Redirect
             if(this.forwardToRoomId){

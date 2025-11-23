@@ -33,30 +33,17 @@ import TallyPane from './TallyPane.vue';
 import data from "@/data.js";
 import money from "@/money.js";
 import {eventBus} from '@/main.js';
-import dbservice from '../dbservice';
 
 export default {
-    props: ['roomId'],
+    props: ['roomObj', 'localUser'],
     data(){
         return {
             gameData: {
                 allTiles: data.getAllTiles()
             },
-            newGameState: {
-                status: 'NOT_READY',
-                availableChanceCards: data.getChanceOptions(),
-                selectedChanceCard: null,
-                players: [
-                ],
-                selectedPlayer: {},
-                currentRolledDice: null,
-                selectedTile: data.getAllTiles()[0],
-                playerToTileMap: {},
-                tileToOwnerMap: {},
-                tileToBoothMap: {},
-                bankMoneyBag: money.getDefaultBankMoneyBag(),
-                uncleMoneyBag: {}
-            }
+            localRoomObj: null,
+            localGameState: null,
+            localNotifications: null
         };
     },
     methods:{
@@ -229,27 +216,71 @@ export default {
         },
         clone(obj){
             return JSON.parse(JSON.stringify(obj));
+        },
+        async saveGameStateInDb(){
+            await updateGameInRoom(this.roomObj.roomId, this.localGameState);
+        },
+        async saveNotificationsInDb(){
+            await updateNotificationsInRoom(this.roomObj.roomId, this.localNotifications);
+        },
+        grabRoomFromProps(){
+            this.localRoomObj = this.roomObj;
+            this.localGameState = this.localRoomObj.gameState;
+            this.localNotifications = this.localRoomObj.notifications;            
+        },
+        setupEventHandler(eventName, eventHandler){
+            eventBus.$on(eventName, async (...eventArgs)=>{
+                let allowed = false;
+                if(this.localGameState.selectedPlayer 
+                    && this.localGameState.selectedPlayer.userId == this.localUser.userId){
+                        allowed = true;
+                } else if(eventName=='addPlayerClicked') {
+                    let foundPlayer = this.localGameState.players.find(player => player.userId==this.localUser.userId);
+                    if(!foundPlayer){
+                        allowed = true;
+                    }
+                } else if(eventName=='addPlayerCancelled' || eventName=='startGameClicked') {
+                    if(this.localGameState.owner.userId == this.localUser.userId){
+                        allowed = true;
+                    }
+                } else if(eventName=='playerClicked') {
+                    const player = eventArgs[0];
+                    if(player.userId == this.localUser.userId){
+                        allowed = true;
+                    } 
+                }
+
+                if(allowed){
+                    eventHandler();
+                    await this.saveGameStateInDb();
+                    await this.saveNotificationsInDb();
+                }
+            });
         }
     },
     mounted(){
-        eventBus.$on('playerClicked', this.onPlayerClicked);
-        eventBus.$on('playerRollClicked', this.onPlayerRollClicked);
-        eventBus.$on('playerMoveClicked', this.onPlayerMoveClicked);
-        eventBus.$on('pickCardClicked', this.onPickCardClicked);
-        eventBus.$on('cardCloseClicked', this.onCloseCardClicked);
-        eventBus.$on('tileClicked', this.onTileClicked);
-        eventBus.$on('jumpHereClicked', this.onJumpHereClicked);
-        eventBus.$on('transferClicked', this.onTransferClicked);
-        eventBus.$on('buyTileClicked', this.onBuyTileClicked);
-        eventBus.$on('addBoothClicked', this.onAddBoothClicked);
-        eventBus.$on('addPlayerClicked', this.onAddPlayerClicked);
-        eventBus.$on('startGameClicked', this.onStartGameClicked);
-        eventBus.$on('showTallyClicked', this.onShowTallyClicked);
-        eventBus.$on('tallyClosed', this.onTallyClosed);
-        eventBus.$on('playerAdded', this.onPlayerAdded);
-        eventBus.$on('addPlayerCancelled', this.onAddPlayerCancelled);
+        setupEventHandler('playerClicked', this.onPlayerClicked);
+        setupEventHandler('playerRollClicked', this.onPlayerRollClicked);
+        setupEventHandler('playerMoveClicked', this.onPlayerMoveClicked);
+        setupEventHandler('pickCardClicked', this.onPickCardClicked);
+        setupEventHandler('cardCloseClicked', this.onCloseCardClicked);
+        setupEventHandler('tileClicked', this.onTileClicked);
+        setupEventHandler('jumpHereClicked', this.onJumpHereClicked);
+        setupEventHandler('transferClicked', this.onTransferClicked);
+        setupEventHandler('buyTileClicked', this.onBuyTileClicked);
+        setupEventHandler('addBoothClicked', this.onAddBoothClicked);
+        setupEventHandler('addPlayerClicked', this.onAddPlayerClicked); //Move them out of Game events
+        setupEventHandler('startGameClicked', this.onStartGameClicked);
+        setupEventHandler('showTallyClicked', this.onShowTallyClicked);
+        setupEventHandler('tallyClosed', this.onTallyClosed);
+        setupEventHandler('playerAdded', this.onPlayerAdded); //Move them out of Game events
+        setupEventHandler('addPlayerCancelled', this.onAddPlayerCancelled); //Move them out of Game events
 
-        this.gameState.status = 'ADD_PLAYER';
+        this.grabRoomFromProps();
+        if(this.localUser.userId == this.localRoomObj.owner.userId){
+            this.localGameState.status = 'ADD_PLAYER';
+            this.saveGameStateInDb();
+        }
     },
     components:{
         TileStrip,

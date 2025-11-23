@@ -5,7 +5,7 @@
       <div class="app-header-logo" @click="logoClick">
         <el-icon ><ChatDotSquare /></el-icon>
         <!--img src="/favicon.ico" style="height:48px;"/-->
-        <h4>Planning Poker</h4>
+        <h4>Tradez!</h4>
       </div>
       <div class="app-flex-spacer"></div>
       <div class="app-header-profile-wrapper">
@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import pokerservice from '@/pokerservice'
+import dbservice from '@/dbservice'
 
 export default {
   name: 'App',
@@ -39,7 +39,7 @@ export default {
       this.$router.push( {name:'login'} );
     },
     checkUserChange(){
-      this.localUser = pokerservice.getLocalUser();
+      this.localUser = dbservice.getAndSyncLocalUser();
     }
   },
   watch:{

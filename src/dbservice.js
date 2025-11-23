@@ -4,28 +4,30 @@ import data from './data.js';
 
 export default {
     getNewRandomPart(){
-        return parseInt(Math.random() * 10000, 10);
+        return parseInt(Math.random() * 10_000, 10);
     },
-    createLocalUser(userName){
+    createOrUpdateLocalUser(userName){
         console.log('DB SERVICE :: createLocalUser ' + userName);
-        let userObjStr = localStorage.getItem("na-tz-user");
+        let userObjStr = localStorage.getItem("na-net-user");
         let userObj = userObjStr ? JSON.parse(userObjStr) : null;
 
         let userId = userObj?.userId ? userObj.userId : (this.getNewRandomPart() + "-" + Date.now());
         userObj = { userId, userName };
         //Sync
-        localStorage.setItem("na-tz-user", JSON.stringify(userObj));
+        localStorage.setItem("na-net-user", JSON.stringify(userObj));
         //DB - Fire and forget
         setDoc(doc(db, 'users', userId), userObj);
+        return userObj;
     },
-    getLocalUser(){
+    /** Returns immediately, but fires-off a DB sync, doesn't wait */
+    getAndSyncLocalUser(){
         console.log('DB SERVICE :: getLocalUser');
         //Sync
-        let userObjStr = localStorage.getItem("na-tz-user");
+        let userObjStr = localStorage.getItem("na-net-user");
         let userObj = userObjStr?JSON.parse(userObjStr):null;
 
         if(userObj){
-            //DB - Fire and forget
+            //Either find existing user, or create user.
             getDoc(doc(db, 'users', userObj.userId)).then((docSnap)=>{
                 if (docSnap.exists()) {
                     console.log(docSnap.data())
@@ -42,9 +44,10 @@ export default {
         console.log('DB SERVICE :: creatRoom ');
         let roomId = this.getNewRandomPart() + "-" + Date.now();
         let localUser = this.getLocalUser();
+        let roomName = `${localUser.userName}'s Room`;
 
         let roomObj = { roomId, 
-            roomName: `${localUser.userName}'s Room`, 
+            roomName, 
             owner: localUser, 
             users:[localUser],
             gameState: {
@@ -63,7 +66,7 @@ export default {
                 uncleMoneyBag: {}
             },
             notifications: [
-                `${localUser.userName}'s room is ready!`
+                `${roomName} is ready!`
             ]
         };
         
@@ -71,6 +74,7 @@ export default {
         await setDoc(doc(db, 'rooms', roomId), roomObj);
         return roomObj;
     },
+    /** Rejoining can update new name even in existing user in room. */
     async getRoomAfterJoining(roomId, userObj){
         console.log('DB SERVICE :: getRoomAfterJoining ' + roomId + ' userObj.userId ' + userObj.userId);
         
@@ -103,6 +107,7 @@ export default {
             return null;
         }
     },
+    /** RISKIEST OP.. Whole game state is controlled from client side on any players' machine */
     async updateGameInRoom(roomObj, gameState){
         console.log('DB SERVICE :: updateGameInRoom roomObj.roomId ' + roomObj.roomId );
         
@@ -112,11 +117,8 @@ export default {
         
         //Save by merge, wait
         await setDoc(doc(db, 'rooms', roomObj.roomId), partRoomObj, { merge: true });
-        let docSnap = await getDoc(doc(db, 'rooms', roomObj.roomId));
-        roomObj = docSnap.data();
-        return roomObj;
     },
-    async updateNotificationsInRoom(roomObj, notifications){
+    async updateNotificationsInRoom(roomId, notifications){
         console.log('DB SERVICE :: updateNotificationsInRoom roomObj.roomId ' + roomObj.roomId );
         
         //Assign necessary
@@ -124,15 +126,12 @@ export default {
         partRoomObj.notifications = notifications;
         
         //Save by merge, wait
-        await setDoc(doc(db, 'rooms', roomObj.roomId), partRoomObj, { merge: true });
-        let docSnap = await getDoc(doc(db, 'rooms', roomObj.roomId));
-        roomObj = docSnap.data();
-        return roomObj;
+        await setDoc(doc(db, 'rooms', roomId), partRoomObj, { merge: true });
     },
-    listenToRoomGameState(roomObj, roomChangeCallback){
+    listenToRoom(roomId, roomChangeCallback){
         console.log(roomChangeCallback);
-        onSnapshot(doc(db, 'rooms', roomObj.roomId), (snap) => {
-            roomChangeCallback(snap.data().gameState);
-          })
+        onSnapshot(doc(db, 'rooms', roomId), (snap) => {
+            roomChangeCallback(snap.data());
+          });
     }
 };
