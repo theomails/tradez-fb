@@ -121,6 +121,7 @@ export default {
     },
     async updateNotificationsInRoom(roomId, notifications){
         console.log('DB SERVICE :: updateNotificationsInRoom roomId ' + roomId );
+        console.log(notifications);
         
         //Assign necessary
         let partRoomObj = {};

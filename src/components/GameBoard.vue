@@ -45,7 +45,8 @@ export default {
             },
             localRoomObj: null,
             localGameState: null,
-            localNotifications: null
+            localNotifications: null,
+            notificationsUpdating: false
         };
     },
     methods:{
@@ -230,6 +231,7 @@ export default {
                     closeDelay: 4500
                 });
             
+            this.notificationsUpdating = true;
             this.localNotifications.unshift(msg);
         },
         clone(obj){
@@ -244,7 +246,9 @@ export default {
         grabRoomFromProps(){
             this.localRoomObj = this.roomObj;
             this.localGameState = this.localRoomObj?.gameState;
-            this.localNotifications = this.localRoomObj?.notifications;            
+            if(!this.notificationsUpdating){
+                this.localNotifications = this.localRoomObj?.notifications;
+            }            
         },
         setupEventHandler(eventName, eventHandler){
             eventBus.on(eventName, async (eventArgs)=>{
@@ -276,6 +280,7 @@ export default {
                     console.log('Saving..');
                     await this.saveGameStateInDb();
                     await this.saveNotificationsInDb();
+                    this.notificationsUpdating = false;
                 }
             });
         }

@@ -52,6 +52,8 @@ export default{
             }            
         },
         onRoomSnapshot(newRoomObj){
+            console.log('Got new snapshot..');
+            console.log(newRoomObj);
             this.roomFromDb = newRoomObj;
         }
     },
