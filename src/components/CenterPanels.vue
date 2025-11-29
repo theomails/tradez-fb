@@ -3,7 +3,8 @@
         <div class="my-center-left">
             <PlayersDisplay :gameState="gameState" :gameData="gameData"></PlayersDisplay>
             <ChanceDisplay :gameState="gameState"></ChanceDisplay>
-            <MessagesDisplay class="func-flex-grow" :gameState="gameState"></MessagesDisplay>
+            <MessagesDisplay class="func-flex-grow" 
+                :messages="messages" :gameState="gameState"></MessagesDisplay>
             
         </div>
         <div class="my-center-right">
@@ -22,7 +23,7 @@ import TransferDisplay from './TransferDisplay.vue';
 import MessagesDisplay from './MessagesDisplay.vue';
 
 export default{
-    props: ["gameState", "gameData"],
+    props: ["gameState", "messages", "gameData"],
     components: {
         PlayersDisplay, 
         TileDisplay,

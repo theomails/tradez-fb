@@ -8,7 +8,7 @@
             <!-- <button @click="onResetGame">Reset Game</button> -->
         </div>
         <select size="10">
-            <option v-for="(message, idx) in gameState.messages" :key="idx">{{ message }}</option>
+            <option v-for="(message, idx) in messages" :key="idx">{{ message }}</option>
         </select>
     </div>
 </template>
@@ -16,7 +16,7 @@
 import {eventBus} from '@/main.js';
 
 export default {
-    props: ['gameState'],
+    props: ['gameState', 'messages'],
     data(){
         return {
 
@@ -34,15 +34,6 @@ export default {
         },
         onResetGame(){
             eventBus.emit('resetGameClicked');
-        }
-    },
-    computed:{
-        activityText(){
-            var text = '';
-            this.gameState.messages.forEach(message => {
-                text = message + '\n' + text;
-            });
-            return text;
         }
     }
 }

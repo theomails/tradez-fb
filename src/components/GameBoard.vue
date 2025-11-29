@@ -12,7 +12,8 @@
                     :fromTileIdx="15" :toTileIdx="11"></TileStrip>
             </div>
             <div class="my-gb-center">
-                <CenterPanels :gameState="localGameState" :gameData="gameData"></CenterPanels>
+                <CenterPanels :gameState="localGameState" :messages="localNotifications"
+                    :gameData="gameData"></CenterPanels>
             </div>
             <div class="my-gb-right">
                 <TileStrip direction="vertical" :gameData="gameData" :gameState="localGameState" 
@@ -64,7 +65,9 @@ export default {
         onPlayerRollClicked(){
             console.log('onPlayerRollClicked');
             this.localGameState.currentRolledDice = (Math.floor(Math.random() * 6) + 1);
-            this.postMessage(`Player ${this.localGameState.selectedPlayer.name} rolled a ${this.localGameState.currentRolledDice}.`);
+            const message = `Player ${this.localGameState.selectedPlayer.name} rolled a ${this.localGameState.currentRolledDice}.`;
+            console.log(this.localGameState.currentRolledDice, message);
+            this.postMessage(message);
         },
         onPlayerMoveClicked(){
             console.log('onPlayerMoveClicked');
@@ -75,12 +78,12 @@ export default {
             var selPlayerId = this.localGameState.selectedPlayer.id;
             //Find tile
             var tileIdOfPlayer = this.localGameState.playerToTileMap[this.localGameState.selectedPlayer.id];
-            var tile = this.localGameData.allTiles.find(thisTile => { return thisTile.id == tileIdOfPlayer });
-            var tileIdx = this.localGameData.allTiles.indexOf(tile);
+            var tile = this.gameData.allTiles.find(thisTile => { return thisTile.id == tileIdOfPlayer });
+            var tileIdx = this.gameData.allTiles.indexOf(tile);
             //Calc next tile idx
-            var nextTileIdx = (tileIdx + rolledVal) % this.localGameData.allTiles.length;
+            var nextTileIdx = (tileIdx + rolledVal) % this.gameData.allTiles.length;
             //Assign values
-            this.localGameState.selectedTile = this.localGameData.allTiles[nextTileIdx];
+            this.localGameState.selectedTile = this.gameData.allTiles[nextTileIdx];
             this.movePlayerIdToTileId(selPlayerId, this.localGameState.selectedTile.id);
         },
         onPickCardClicked(){
@@ -98,7 +101,7 @@ export default {
         },
         onTileClicked({tileId}){
             console.log('onTileClicked');
-            var tile = this.localGameData.allTiles.find(thisTile => { return thisTile.id == tileId });
+            var tile = this.gameData.allTiles.find(thisTile => { return thisTile.id == tileId });
             this.localGameState.selectedTile = tile;
         },
         onJumpHereClicked(){
@@ -248,7 +251,7 @@ export default {
                 let allowed = false;
                 console.log('Checking event..', eventName, eventArgs);
                 if(this.localGameState.selectedPlayer 
-                    && this.localGameState.selectedPlayer.userId == this.localUser.userId){
+                    && this.localGameState.selectedPlayer.id == this.localUser.userId){
                         allowed = true;
                 } else if(eventName=='playerAdded') {
                     let foundPlayer = this.localGameState.players.find(player => player.userId==this.localUser.userId);
@@ -275,6 +278,11 @@ export default {
                     await this.saveNotificationsInDb();
                 }
             });
+        }
+    },
+    watch: {
+        roomObj(){
+            this.grabRoomFromProps();
         }
     },
     mounted(){
@@ -322,7 +330,7 @@ export default {
     width: 100vw;
     height: 100vh;
     margin: 0px;
-    padding: 5px;
+    padding: 0px;
 
     display:flex;
     flex-direction: column;
@@ -330,7 +338,7 @@ export default {
 .my-gb-middle{
     flex: 1;
     display: flex;
-    margin: 7px 0px;
+    margin: 0px;
 }
 .my-gb-center{
     flex: 1;
