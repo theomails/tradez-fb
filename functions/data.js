@@ -299,4 +299,4 @@ function getAllTiles(){
       ];
 }
 
-export default {getChanceOptions, getAllTiles}
+module.exports = {getChanceOptions, getAllTiles}

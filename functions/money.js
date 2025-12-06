@@ -48,4 +48,4 @@ function transferInline(fromBag, toBag, ops){
     });
 }
 
-export default {getDefaultPlayerMoneyBag, getDefaultBankMoneyBag, getPossibleDenominations, neatViewOfBag, transferInline};
+module.exports = {getDefaultPlayerMoneyBag, getDefaultBankMoneyBag, getPossibleDenominations, neatViewOfBag, transferInline};
