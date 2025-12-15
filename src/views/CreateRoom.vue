@@ -30,6 +30,7 @@
 </template>
 <script>
 import dbservice from '@/dbservice.js'
+import backendhelper from '@/backendhelper.js'
 
 export default {
     data(){
@@ -48,12 +49,12 @@ export default {
                     });
                 
                 this.$Progress.start();
-                let room = await dbservice.createRoom(this.teamName);
+                let roomId = await backendhelper.createRoomGetId();
                 
                 this.$Progress.finish();
 
                 //Redirect
-                this.$router.push({name:'room', params:{roomId: room.roomId }});
+                this.$router.push({name:'room', params:{ roomId }});
             } catch (err){
                 console.log(err);
             }

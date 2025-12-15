@@ -5,6 +5,7 @@
 </template>
 <script>
 import dbservice from "@/dbservice.js"
+import backendhelper from "@/backendhelper.js"
 import GameBoard from "../components/GameBoard.vue";
 
 export default{
@@ -24,23 +25,16 @@ export default{
                     showClose: false,
                     type:'success'
                 });
-                let roomObj = await dbservice.getRoomAfterJoining(this.roomId, this.localUser);
-                if(roomObj){
-                    this.roomFromDb = roomObj;
-                    console.log(this.roomFromDb);
-
-                    //Just call again, as anyone could collide with another one when joining
-                    this.roomFromDb = await dbservice.getRoomAfterJoining(this.roomId, this.localUser);
-                    
-                    //Add a listener hook
-                    dbservice.listenToRoom(roomObj.roomId, this.onRoomSnapshot);
-                }else{
+                try{
+                    await backendhelper.initiateJoinRoom(this.roomId, this.localUser);
+                    dbservice.listenToRoom(this.roomId, this.onRoomSnapshot);
+                } catch (err) {
                     this.$notify({
                         message: 'Unable to find a matching room. Please check the link. Redirecting...',
                         showClose: false,
                         type:'error',
                         onClose: ()=>{ this.$router.push({name:'create-room'}); }
-                    });
+                    });                    
                 }
             }else{
                 this.$notify({

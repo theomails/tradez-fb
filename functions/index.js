@@ -7,6 +7,10 @@ const { initializeApp, getApps } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
 if (!getApps().length) initializeApp();            // safe guard in dev/emulator
+
+const adminApp = require('firebase-admin/app').getApp();
+console.log('admin projectId:', adminApp.options.projectId);
+
 const db = getFirestore();                          // now safe to call
 
 const { AppHttpError, buildResponseForAppHttpError } = require('./error');
@@ -26,11 +30,12 @@ const allowedOrigins = [
 ];
 function setCorsHeaders(req, res){
   // Set CORS headers (Allows all origins)
-  const origin = req.headers.origin;
+  const origin = req.headers.origin || '';
   if (allowedOrigins.includes(origin)) {
     res.set("Access-Control-Allow-Origin", origin);
   }
-  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");  
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");  
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With"); 
 }
 
 /*
@@ -96,8 +101,14 @@ async function addUserToRoomInner(userId, roomId){
 exports.addUserToRoom = onRequest(async (req, res) => {
     try {
         setCorsHeaders(req, res);
+        if (req.method === "OPTIONS") { //Preflight
+          return res.status(204).send('');
+        } else if (req.method !== "POST") {
+          return res.status(405).send('Method Not Allowed');
+        }
 
         const { userId, roomId } = req.body;
+        console.log(req.body);
         const result = await addUserToRoomInner(userId, roomId);
         
         return res.status(200).json({ message: result.statusMessage });
@@ -149,11 +160,22 @@ async function createRoomByOwnerInner (userId){
 exports.createRoomByOwner = onRequest(async (req, res)=>{
     try {
         setCorsHeaders(req, res);
+        if (req.method === "OPTIONS") { //Preflight
+          return res.status(204).send('');
+        } else if (req.method !== "POST") {
+          return res.status(405).send('Method Not Allowed');
+        }
+      
 
         const { userId } = req.body;
+        console.log(req.body);
         const roomObj = await createRoomByOwnerInner(userId);
 
-        return res.status(200).json(roomObj);
+        return res.status(200).json({ 
+          statusCode: 'CREATED', 
+          statusMessage: 'Room created',
+          roomId: roomObj.roomId
+         });
       } catch (error) {
         if(error instanceof AppHttpError){
           console.error("App error with createRoomByOwner operation:", error);
@@ -169,12 +191,18 @@ exports.createRoomByOwner = onRequest(async (req, res)=>{
 exports.processGameCommand = onRequest(async (req, res)=>{
     try {
         setCorsHeaders(req, res);
+        if (req.method === "OPTIONS") { //Preflight
+          return res.status(204).send('');
+        } else if (req.method !== "POST") {
+          return res.status(405).send('Method Not Allowed');
+        }
 
-        const { userId, roomId, eventName, eventData } = req.body;
+        const { userId, roomId, eventName, eventArgs } = req.body;
+        console.log(req.body);
         const userObj = await loadUser(userId);
         const roomObj = await loadRoom(roomId);
         
-        await gameservice.handleEvent(eventName, eventData, roomObj, userObj);
+        await gameservice.handleEvent(eventName, eventArgs, roomObj, userObj);
 
         return res.status(200).json({ message: 'Event processed.' });
       } catch (error) {

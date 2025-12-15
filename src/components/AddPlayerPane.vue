@@ -1,5 +1,5 @@
 <template>
-    <div class="my-add-player-pane" v-show="gameState && gameState.status=='ADD_PLAYER'">
+    <div class="my-add-player-pane" v-show="!meAddedAsPlayer">
         <div class="my-add-player-popup func-popup">
             <div class="func-popup-title">
                 Add Player
@@ -40,7 +40,7 @@
 import {eventBus} from '@/main.js';
 
 export default{
-    props: ['gameState'],
+    props: ['gameState', 'user'],
     data(){
         return {
             playerName: '',
@@ -60,6 +60,18 @@ export default{
         this.playerColor = this.pastelColors[randColorIdx];
         if(this.$refs.playerNameTxt){
             this.$refs.playerNameTxt.focus();
+        }
+    },
+    computed: {
+        meAddedAsPlayer(){
+            const players = this.gameState?.players;
+            if(players){
+                const mePlayer = players.find(player => player.id == this.user.userId);
+                if(mePlayer){
+                    return true;
+                }
+            }
+            return false;
         }
     },
     methods:{

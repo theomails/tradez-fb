@@ -5,12 +5,8 @@ export default {
     getNewRandomPart(){
         return parseInt(Math.random() * 10000, 10);
     },
-
-    
-
-
     createOrUpdateLocalUser(userName){
-        console.log('DB SERVICE :: createLocalUser ' + userName);
+        console.log('DB SERVICE :: createOrUpdateLocalUser ' + userName);
         let userObjStr = localStorage.getItem("na-net-user");
         let userObj = userObjStr ? JSON.parse(userObjStr) : null;
 
@@ -24,7 +20,7 @@ export default {
     },
     /** Returns immediately, but fires-off a DB sync, doesn't wait */
     getAndSyncLocalUser(){
-        console.log('DB SERVICE :: getLocalUser');
+        console.log('DB SERVICE :: getAndSyncLocalUser');
         //Sync
         let userObjStr = localStorage.getItem("na-net-user");
         let userObj = userObjStr?JSON.parse(userObjStr):null;
@@ -43,20 +39,9 @@ export default {
         }
         return userObj;
     },
-    async createRoom(){
-        console.log('DB SERVICE :: createRoom ');
-        let localUser = this.getAndSyncLocalUser();
+    getRoom(roomId){
+        console.log('DB SERVICE :: getRoom roomId:' + roomId);
 
-    },
-    /** Rejoining can update new name even in existing user in room. */
-    async getRoomAfterJoining(roomId, userObj){
-        console.log('DB SERVICE :: getRoomAfterJoining ' + roomId + ' userObj.userId ' + userObj.userId);
-        
-
-    },
-    /** RISKIEST OP.. Whole game state is controlled from client side on any players' machine */
-    async postCommandToRoom(roomId, commandObj){
-        
     },
     listenToRoom(roomId, roomChangeCallback){
         onSnapshot(doc(db, 'rooms', roomId), (snap) => {

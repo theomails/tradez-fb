@@ -1,4 +1,4 @@
-const log = require("firebase-functions/logger");
+const logger = require("firebase-functions/logger");
 const { getFirestore } = require('firebase-admin/firestore');
 const  data = require('./data');
 const money = require('./money');
@@ -52,12 +52,12 @@ function onPlayerMoveClicked(eventData, gameState, notifications, userObj){
     gameState.currentRolledDice = null;
     gameState.selectedTile = data.getAllTiles()[nextTileIdx];
 
-    const roomObjForMerge = { gameState: {} };
+    let roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.currentRolledDice = gameState.currentRolledDice;
     roomObjForMerge.gameState.selectedTile = gameState.selectedTile;
 
-    roomObjForMerge = movePlayerIdToTileId(selPlayerId, roomObjForMerge.gameState.selectedTile.id, gameState,
-      roomObj, notifications);
+    roomObjForMerge = movePlayerIdToTileId(selPlayerId, roomObjForMerge.gameState.selectedTile.id, 
+      roomObjForMerge, gameState, notifications);
     return roomObjForMerge;
 }
 function onPickCardClicked(eventData, gameState, notifications, userObj){
@@ -99,7 +99,7 @@ function onJumpHereClicked(eventData, gameState, notifications, userObj){
     return roomObjForMerge;
 }
 function onTransferClicked(eventData, roomObjForMerge, gameState, notifications, userObj){
-  log.info('Inside onTransferClicked ', eventData);
+  logger.info('Inside onTransferClicked ', eventData);
   const {fromBagOption, toBagOption, fromOps, toOps, transferSummaryText} = eventData;
   runOpsAndSave(fromBagOption, toBagOption, fromOps, roomObjForMerge, gameState);
   runOpsAndSave(toBagOption, fromBagOption, toOps, roomObjForMerge, gameState);
@@ -111,7 +111,7 @@ function onTransferClicked(eventData, roomObjForMerge, gameState, notifications,
 }
 //Returns void
 function runOpsAndSave(fromBagWrapper, toBagWrapper, ops, roomObjForMerge, gameState){
-    log.info('Inside runOpsAndSave ', {fromBagWrapper, toBagWrapper, ops});
+    logger.info('Inside runOpsAndSave ', {fromBagWrapper, toBagWrapper, ops});
     Object.keys(ops).forEach(denom => {
         var val = ops[denom] || 0;
         var avl = fromBagWrapper.bag[denom] || 0;
@@ -127,19 +127,19 @@ function runOpsAndSave(fromBagWrapper, toBagWrapper, ops, roomObjForMerge, gameS
 //Returns void
 function updateBag(bagWrapper, roomObjForMerge, gameState){
   if(bagWrapper.type=='bank'){
-    log.info('Update bank');
+    logger.info('Update bank');
     gameState.bankMoneyBag = structuredClone(bagWrapper.bag);
 
     roomObjForMerge.gameState = roomObjForMerge.gameState || gameState;
     roomObjForMerge.gameState.bankMoneyBag = gameState.bankMoneyBag;
   }else if(bagWrapper.type=='uncle'){
-    log.info('Update uncle');
+    logger.info('Update uncle');
     gameState.uncleMoneyBag = structuredClone(bagWrapper.bag);
 
     roomObjForMerge.gameState = roomObjForMerge.gameState || gameState;
     roomObjForMerge.gameState.uncleMoneyBag = gameState.uncleMoneyBag;
   }else{
-    log.info('Update player');
+    logger.info('Update player');
     var player = gameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
     player.moneyBag = structuredClone(bagWrapper.bag);
 
@@ -207,9 +207,6 @@ function onTallyClosed(){
     return roomObjForMerge;
 }
 function onPlayerAdded({playerColor}, gameState, notifications, userObj){
-    if(playerName != this.localUser.userName){
-        playerName = `${playerName} (${this.localUser.userName})`;
-    }
     var player = {
         id: userObj.userId,
         name: userObj.userName,
@@ -278,7 +275,7 @@ function handleEventInner(eventName, eventData, gameState, notifications, userOb
   return roomObjForMerge;
 }
 
-async function handleEvent(eventName, eventData, roomObj, userObj){
+exports.handleEvent = async function(eventName, eventData, roomObj, userObj){
     logger.info('Checking event..', {eventName, userId: userObj.userId});
     let allowed = false;
     const gameState = roomObj.gameState;
@@ -312,11 +309,11 @@ async function handleEvent(eventName, eventData, roomObj, userObj){
     }
 
     if(allowed){
-      log.info('Allowed..');
+      logger.info('Allowed..');
       roomObjForMerge = handleEventInner(eventName, eventData, gameState, notifications, userObj);
     }
     if(roomObjForMerge){
-      log.info('Saving..');
-      await db.doc(`rooms/${roomId}`).set(roomObjForMerge, { merge: true });
+      logger.info('Saving..');
+      await db.doc(`rooms/${roomObj.roomId}`).set(roomObjForMerge, { merge: true });
     }
 }

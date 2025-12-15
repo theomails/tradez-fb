@@ -11,6 +11,7 @@
     "@aacassandra/vue3-progressbar": "^1.0.3",
     "@element-plus/icons-vue": "^2.1.0",
     "@kyvg/vue3-notification": "^3.4.2",
+    "axios": "^1.13.2",
     "core-js": "^3.6.5",
     "element-plus": "^2.4.2",
     "firebase": "^9.1.1",
