@@ -1,6 +1,6 @@
 <template>
     <div class="my-transfer-display">
-        <div class="my-transfer-header">
+        <div class="my-transfer-header func-flex">
             <select class="my-transfer-from" v-model="fromBagId">
                 <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
             </select>
@@ -9,15 +9,15 @@
                 <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
             </select>
         </div>
-        <div class="my-transfer-ops">
+        <div class="my-transfer-ops my-center-big-font">
             <OpsEditor :bagWrapper="getWrapperForBagId(fromBagId)" :neatOps="getNeatOps(fromOps)"
                 @increment="perform('from', 'increment', $event)" @decrement="perform('from', 'decrement', $event)"></OpsEditor>
             <OpsEditor :bagWrapper="getWrapperForBagId(toBagId)" :neatOps="getNeatOps(toOps)"
                 @increment="perform('to', 'increment', $event)" @decrement="perform('to', 'decrement', $event)"></OpsEditor>
         </div>
         <div class="my-transfer-footer">
-            Transfering {{ transferSummaryText }}
-            <button @click="onTransferClick">Transfer</button>
+            <span class="my-center-bigger-font">{{ transferSummaryText }}</span>
+            <button @click="onTransferClick" :disabled="transferNetAmount==0">Transfer</button>
         </div>
     </div>
 </template>
@@ -106,7 +106,16 @@ export default {
                 fromName = toName;
                 toName = tmpName;
             }
-            return `$${netAmount} from ${fromName} to ${toName}`;
+            if(netAmount == 0){
+                return 'Nothing to transfer.';
+            }
+            return `Transfering $${netAmount} from ${fromName} to ${toName}`;
+        },
+        transferNetAmount(){
+            var fromAmt = this.getTotal(this.fromOps);
+            var toAmt = this.getTotal(this.toOps);
+            var netAmount = fromAmt - toAmt;
+            return netAmount;
         },
         bagOptions(){
             var bagOptions = [];
@@ -149,6 +158,10 @@ export default {
     display: flex;
     justify-content: space-between;
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.my-center-bigger-font{
+    font-size: 1.3em;
+    font-style: italic;
 }
 </style>

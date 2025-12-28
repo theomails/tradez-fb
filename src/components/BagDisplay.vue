@@ -1,9 +1,10 @@
 <template>
     <div class="my-bag-holdings">
-        <span v-for="(num, denom) in bagForView" :key="denom">
-            {{ `[\$${denom} x ${num}] ` }}
+        <span>💵 </span>
+        <span v-for="(num, denom, idx) in bagForView" :key="denom">
+            {{ `\$${denom} x ${num}` + separatorCalc(idx) }}
         </span>
-        <span> :: Total: ${{ bagTotal }}</span>
+        <span class="my-bag-total">  Total: ${{ bagTotal }}</span>
     </div>
 </template>
 <script>
@@ -16,9 +17,14 @@ export default{
             
         };
     },
+    methods:{
+        separatorCalc(idx){
+            return idx<(this.bagDenomsCount-1)?', ':'';
+        }
+    },
     computed:{
         bagForView(){
-            return money.neatViewOfBag(this.bag);
+            return money.neatViewOfBagFiltered(this.bag);
         },
         bagTotal(){
             var sum = 0;
@@ -26,10 +32,12 @@ export default{
                 sum += denom * this.bagForView[denom];
             });
             return sum;
+        },
+        bagDenomsCount(){
+            return Object.keys(this.bagForView).length;
         }
     }
 }
 </script>
 <style>
-
 </style>

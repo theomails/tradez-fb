@@ -2,14 +2,14 @@
     <div class="my-add-player-pane" v-show="!meAddedAsPlayer">
         <div class="my-add-player-popup func-popup">
             <div class="func-popup-title">
-                Add Player
+                Join the Game
             </div>
             <div class="func-popup-content">
                 <div class="func-flex">
-                    <div >Please enter the name of the player:</div>
+                    <div >Your player name will be:</div>
                     <div class="func-flex-grow func-flex-vertical" >
-                        <input ref="playerNameTxt" class="my-player-name" type="text" 
-                                    v-model="playerName" @keypress="playerNameError = ''" @keyup.enter="onAddPlayer" />
+                        <input ref="playerNameTxt" class="my-player-name" type="text" disabled
+                                    :value="playerName" @keypress="playerNameError = ''" @keyup.enter="onAddPlayer" />
                         <span v-if="playerNameError"  class="func-input-text-error" >
                             <br/>{{ playerNameError }}
                         </span>
@@ -28,9 +28,10 @@
                         &nbsp;
                     </div>
                 </div>
+                <br/><br/>
             </div>
             <div class="func-popup-action">
-                <button @click="onAddPlayer">Add Player</button>
+                <button @click="onAddPlayer">Join Game</button>
                 <button @click="onCancelAddPlayer">Cancel</button>
             </div>
         </div>
@@ -43,7 +44,6 @@ export default{
     props: ['gameState', 'user'],
     data(){
         return {
-            playerName: '',
             playerNameError: '',
             playerColor: '',
             pastelColors: [
@@ -58,11 +58,15 @@ export default{
     mounted(){
         var randColorIdx = Math.floor(Math.random() * (this.pastelColors.length));
         this.playerColor = this.pastelColors[randColorIdx];
+
         if(this.$refs.playerNameTxt){
             this.$refs.playerNameTxt.focus();
         }
     },
     computed: {
+        playerName(){
+            return this.user?.userName || '';
+        },
         meAddedAsPlayer(){
             const players = this.gameState?.players;
             if(players){
@@ -84,7 +88,7 @@ export default{
                 return;
             }
             eventBus.emit('playerAdded', {playerName:this.playerName, playerColor:this.playerColor});
-            this.playerName = '';
+            //this.playerName = '';
             this.playerColor = this.pastelColors[0];
             this.$nextTick(()=>{
                 if(this.$refs.playerNameTxt){
@@ -122,7 +126,6 @@ export default{
     border-bottom: 1px solid #ccc;
     background-color: rgba(250,250,250, 0.6);
     outline: none;
-    font-size: 1.4em;
 }
 .my-player-name:focus{
     border-bottom: 1px solid #1e0e94;
@@ -146,7 +149,7 @@ export default{
 }
 .func-popup{
     width: 50%;
-    min-height: 250px;
+    min-height: 200px;
     background-color: white;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     border: 1px solid #aaa;
@@ -167,14 +170,14 @@ export default{
     flex: 1;
     padding-top: 0px;
 }
-.func-popup-action{
-    margin-bottom: 10px;
+.func-popup .func-popup-action{
+    padding-top: 0px;
     display: flex;
     justify-content: center;
 }
 .func-popup-action button{
     margin: 0px 10px;
-    padding: 10px 15px;
+    padding: 5px 15px;
 }
 .func-input-text-error{
     font-size: 0.8em;

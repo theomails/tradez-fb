@@ -207,10 +207,10 @@ exports.processGameCommand = onRequest(async (req, res)=>{
         return res.status(200).json({ message: 'Event processed.' });
       } catch (error) {
         if(error instanceof AppHttpError){
-          console.error("App error with createRoomByOwner operation:", error);
+          console.error("App error with processGameCommand operation:", error);
           return buildResponseForAppHttpError(error, res);
         } else {
-          console.error("Unknown error with createRoomByOwner operation:", error);
+          console.error("Unknown error with processGameCommand operation:", error);
           return res.status(error.response?.status || 500).json({ error: error.message });
         }
       }

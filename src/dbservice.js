@@ -5,6 +5,10 @@ export default {
     getNewRandomPart(){
         return parseInt(Math.random() * 10000, 10);
     },
+    async lockRoomForAction(roomId, mode){
+        const locked = mode==='unlock'?false:true;
+        await setDoc(doc(db, "rooms", roomId), { locked }, { merge: true });
+    },
     createOrUpdateLocalUser(userName){
         console.log('DB SERVICE :: createOrUpdateLocalUser ' + userName);
         let userObjStr = localStorage.getItem("na-net-user");

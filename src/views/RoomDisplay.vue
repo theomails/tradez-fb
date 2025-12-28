@@ -92,7 +92,7 @@ export default{
     left:0;
     width: 100vw;
     height: 100vh;
-    background-color: #fee;
+    background-color: rgba(247, 232, 205, 0.6);
     z-index: 1000;
     font-size: 1em;
 }

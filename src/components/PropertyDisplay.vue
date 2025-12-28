@@ -1,11 +1,12 @@
 <template>
     <div class="my-bag-holdings">
-        <span>Property :: </span>
+        <span>🏡 </span>
         <template v-if="playerTileSummaries.length>0">
             <span v-for="summary in playerTileSummaries" :key="summary.tile.id">
-                {{ `[${summary.tile.name} \$${summary.tile.priceOrCharge} + ${summary.boothCount} * \$${summary.tile.priceOrCharge}] ` }}
+                {{ `[${summary.tile.name} \$${summary.tile.priceOrCharge} ` }}
+                {{ summary.boothCount>0?`+ ${summary.boothCount} booths * \$${summary.tile.priceOrCharge}] `:']' }}
             </span>
-            <span v-if="playerTileSummaries.length>0"> :: Total: ${{ totalValue }}</span>
+            <span v-if="playerTileSummaries.length>0">  Total: ${{ totalValue }}</span>
         </template>
         <span v-else>
             No property yet!

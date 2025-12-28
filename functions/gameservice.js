@@ -5,24 +5,29 @@ const money = require('./money');
 
 const db = getFirestore();
 
-function movePlayerIdToTileId(playerId, tileId, roomObjForMerge, gameState, notifications){
+function prepareMovePlayerIdToTileId(playerId, tileId, roomObjForMerge, gameState, notifications){
     gameState.playerToTileMap[playerId] = tileId;
 
     roomObjForMerge.gameState = roomObjForMerge.gameState || {};
     roomObjForMerge.gameState.playerToTileMap = gameState.playerToTileMap;
 
-    var player = gameState.players.find(thisPlayer => { return thisPlayer.id == playerId });
-    var tile = data.getAllTiles().find(thisTile => { return thisTile.id == tileId });
+    const player = gameState.players.find(thisPlayer => { return thisPlayer.id == playerId });
+    const tile = data.getAllTiles().find(thisTile => { return thisTile.id == tileId });
     const message = `Player ${player.name} moved to tile ${tile.name}.`;
 
     roomObjForMerge.notifications = roomObjForMerge.notifications || notifications;
-    roomObjForMerge.notifications.push(message);
+    roomObjForMerge.notifications.unshift(message);
     return roomObjForMerge;
 }
 function onPlayerClicked({player}, gameState, notifications, userObj){
-  const foundPlayer = gameState.players.find(p => p.id == player.id); 
-  gameState.selectedPlayer = foundPlayer
+  const newSelectedPlayer = gameState.players.find(p => p.id == player.id); 
+  const oldSelectedPlayer = gameState.selectedPlayer;
+  gameState.selectedPlayer = { //Not strictly necessary, as all players have uniform props. Anyway, just in case..
+    ...nullExistingProps(oldSelectedPlayer),
+    ...newSelectedPlayer
+  };
 
+  logger.info("onPlayerClicked: Proceeding with ", { inPlayerId: player.id, newSelectedPlayer: gameState.selectedPlayer });
   const roomObjForMerge = { gameState: {} };
   roomObjForMerge.gameState.selectedPlayer = gameState.selectedPlayer;
   return roomObjForMerge;
@@ -30,98 +35,127 @@ function onPlayerClicked({player}, gameState, notifications, userObj){
 function onPlayerRollClicked(eventData, gameState, notifications, userObj){
   gameState.currentRolledDice = (Math.floor(Math.random() * 6) + 1);
   
+  logger.info("onPlayerRollClicked: Proceeding with ", { currentRolledDice: gameState.currentRolledDice});
   const roomObjForMerge = { gameState: {} };
   roomObjForMerge.gameState.currentRolledDice = gameState.currentRolledDice;
   
   const message = `Player ${gameState.selectedPlayer.name} rolled a ${gameState.currentRolledDice}.`;
   roomObjForMerge.notifications = notifications;
-  roomObjForMerge.notifications.push(message);
+  roomObjForMerge.notifications.unshift(message);
   return roomObjForMerge;
 }
 function onPlayerMoveClicked(eventData, gameState, notifications, userObj){
-    var rolledVal = gameState.currentRolledDice;
-    var selPlayerId = gameState.selectedPlayer.id;
-    var tileIdOfPlayer = gameState.playerToTileMap[gameState.selectedPlayer.id];
+    const rolledVal = gameState.currentRolledDice;
+    const selPlayerId = gameState.selectedPlayer.id;
+    const tileIdOfPlayer = gameState.playerToTileMap[selPlayerId];
 
     //Current tile idx
-    var tile = data.getAllTiles().find(thisTile => { return thisTile.id == tileIdOfPlayer });
-    var tileIdx = data.getAllTiles().indexOf(tile);
+    const foundTileIdx = data.getAllTiles().findIndex(thisTile => { return thisTile.id == tileIdOfPlayer });
     //Calc next tile idx
-    var nextTileIdx = (tileIdx + rolledVal) % data.getAllTiles().length;
+    const nextTileIdx = (foundTileIdx + rolledVal) % data.getAllTiles().length;
 
+    const newSelectedTile = data.getAllTiles()[nextTileIdx];
+    const oldSelectedTile = gameState.selectedTile;
     gameState.currentRolledDice = null;
-    gameState.selectedTile = data.getAllTiles()[nextTileIdx];
+    gameState.selectedTile = {
+      ...nullExistingProps(oldSelectedTile),
+      ...newSelectedTile
+    };
 
     let roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.currentRolledDice = gameState.currentRolledDice;
     roomObjForMerge.gameState.selectedTile = gameState.selectedTile;
 
-    roomObjForMerge = movePlayerIdToTileId(selPlayerId, roomObjForMerge.gameState.selectedTile.id, 
+    logger.info("onPlayerMoveClicked: Proceeding with: ", {
+      rolledVal, selPlayerId, tileIdOfPlayer, foundTileIdx, nextTileIdx, selectedTile: gameState.selectedTile
+    });
+    roomObjForMerge = prepareMovePlayerIdToTileId(selPlayerId, roomObjForMerge.gameState.selectedTile.id, 
       roomObjForMerge, gameState, notifications);
     return roomObjForMerge;
 }
 function onPickCardClicked(eventData, gameState, notifications, userObj){
-    var availableChanceCards = gameState.availableChanceCards;
-    var pickedIdx = Math.floor(Math.random() * (availableChanceCards.length - 0.01));
-    var cards = availableChanceCards.splice(pickedIdx, 1);
+    const availableChanceCards = gameState.availableChanceCards;
+    const pickedIdx = Math.floor(Math.random() * (availableChanceCards.length - 0.01));
+    const cards = availableChanceCards.splice(pickedIdx, 1);
     gameState.selectedChanceCard = cards[0];
     gameState.availableChanceCards = availableChanceCards;
 
-    const roomObjForMerge = {};
+    logger.info("onPickCardClicked: Proceeding with ", { 
+      pickedIdx, selectedChanceCard: cards[0], availableChanceCardsLen: availableChanceCards.length 
+    });
+    const roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.selectedChanceCard = gameState.selectedChanceCard;
     roomObjForMerge.gameState.availableChanceCards = gameState.availableChanceCards;
 
     const message = `Player ${gameState.selectedPlayer.name} picked chance card: ${roomObjForMerge.gameState.selectedChanceCard}.`;
     roomObjForMerge.notifications = notifications;
-    roomObjForMerge.notifications.push(message);
+    roomObjForMerge.notifications.unshift(message);
     return roomObjForMerge;
 }
 function onCloseCardClicked(eventData, gameState, notifications, userObj){
   gameState.selectedChanceCard = null;
 
+  logger.info("onCloseCardClicked: Proceeding ");
   const roomObjForMerge = { gameState: {} };
   roomObjForMerge.gameState.selectedChanceCard = gameState.selectedChanceCard;
   return roomObjForMerge;
 }
 function onTileClicked({tileId}, gameState, notifications, userObj){
-  var tile = data.getAllTiles().find(thisTile => { return thisTile.id == tileId });
-  gameState.selectedTile = tile;
+  const newSelectedTile = data.getAllTiles().find(thisTile => { return thisTile.id == tileId });
+  const oldSelectedTile = gameState.selectedTile;
+  gameState.selectedTile = {
+    ...nullExistingProps(oldSelectedTile),
+    ...newSelectedTile
+  };
 
+  logger.info("onTileClicked: Proceeding with ", { inTileId: tileId, foundTile: newSelectedTile });
   const roomObjForMerge = { gameState: {} };
   roomObjForMerge.gameState.selectedTile = gameState.selectedTile;
   return roomObjForMerge;
 }
 function onJumpHereClicked(eventData, gameState, notifications, userObj){
-    var tile = gameState.selectedTile;
-    var player = gameState.selectedPlayer;
+    const tile = gameState.selectedTile;
+    const player = gameState.selectedPlayer;
+
+    logger.info("onJumpHereClicked: Proceeding with ", { player, toTile: tile });
     const roomObjForMerge = { gameState: {} };
-    movePlayerIdToTileId(player.id, tile.id, roomObjForMerge, gameState, notifications);
+    prepareMovePlayerIdToTileId(player.id, tile.id, roomObjForMerge, gameState, notifications);
     return roomObjForMerge;
 }
-function onTransferClicked(eventData, roomObjForMerge, gameState, notifications, userObj){
+function onTransferClicked(eventData, gameState, notifications, userObj){
   logger.info('Inside onTransferClicked ', eventData);
+  const roomObjForMerge = { gameState: {} };
   const {fromBagOption, toBagOption, fromOps, toOps, transferSummaryText} = eventData;
-  runOpsAndSave(fromBagOption, toBagOption, fromOps, roomObjForMerge, gameState);
-  runOpsAndSave(toBagOption, fromBagOption, toOps, roomObjForMerge, gameState);
+
+  loadBagIntoWrapper(fromBagOption, gameState);
+  loadBagIntoWrapper(toBagOption, gameState);
+  runOpsAndSave('doFromOps', fromBagOption, toBagOption, fromOps, roomObjForMerge, gameState);
+  runOpsAndSave('doToOps', toBagOption, fromBagOption, toOps, roomObjForMerge, gameState);
   
   const message = `Transferred ${transferSummaryText}.`;
   roomObjForMerge.notifications = roomObjForMerge.notifications || notifications;
-  roomObjForMerge.notifications.push(message);
+  roomObjForMerge.notifications.unshift(message);
+
+  logger.info('Out onTransferClicked ', roomObjForMerge);
   return roomObjForMerge;
 }
 //Returns void
-function runOpsAndSave(fromBagWrapper, toBagWrapper, ops, roomObjForMerge, gameState){
-    logger.info('Inside runOpsAndSave ', {fromBagWrapper, toBagWrapper, ops});
+function runOpsAndSave(reasonStr, fromBagWrapper, toBagWrapper, ops, roomObjForMerge, gameState){
+    logger.info('Inside runOpsAndSave ', { reasonStr, fromBagWrapper, toBagWrapper, ops});
     Object.keys(ops).forEach(denom => {
-        var val = ops[denom] || 0;
-        var avl = fromBagWrapper.bag[denom] || 0;
-        var now = toBagWrapper.bag[denom] || 0;
-        var rest = avl - val;
-        var newNow = now + val;
-        fromBagWrapper.bag[denom] = rest;
-        toBagWrapper.bag[denom] = newNow;
-        updateBag(fromBagWrapper, roomObjForMerge, gameState);
-        updateBag(toBagWrapper, roomObjForMerge, gameState);
+        const val = ops[denom] || 0;
+        if(val){
+          const fromAvl = fromBagWrapper.bag[denom] || 0;
+          const toNow = toBagWrapper.bag[denom] || 0;
+          const fromRest = fromAvl - val;
+          const toNew = toNow + val;
+          logger.info({denom, fromAvl, fromRest, toNow, toNew});
+          
+          fromBagWrapper.bag[denom] = fromRest;
+          toBagWrapper.bag[denom] = toNew;
+          updateBag(fromBagWrapper, roomObjForMerge, gameState);
+          updateBag(toBagWrapper, roomObjForMerge, gameState);          
+        }
     });
 }
 //Returns void
@@ -140,43 +174,71 @@ function updateBag(bagWrapper, roomObjForMerge, gameState){
     roomObjForMerge.gameState.uncleMoneyBag = gameState.uncleMoneyBag;
   }else{
     logger.info('Update player');
-    var player = gameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
+    const player = gameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
     player.moneyBag = structuredClone(bagWrapper.bag);
 
     roomObjForMerge.gameState = roomObjForMerge.gameState || gameState;
     roomObjForMerge.gameState.players = gameState.players;
+
+    if(gameState.selectedPlayer?.id && gameState.selectedPlayer.id==bagWrapper.playerId ){
+      gameState.selectedPlayer.moneyBag = bagWrapper.bag;
+      roomObjForMerge.gameState.selectedPlayer = structuredClone(gameState.selectedPlayer);
+    }
+  }
+}
+function loadBagIntoWrapper(bagWrapper, gameState){
+  if(bagWrapper.type=='bank'){
+    logger.info('Load bank bag as bag');
+    bagWrapper.bag = structuredClone(gameState.bankMoneyBag);
+  }else if(bagWrapper.type=='uncle'){
+    logger.info('Load uncle bag as bag');
+    bagWrapper.bag = structuredClone(gameState.uncleMoneyBag);
+  }else{
+    logger.info('Load player bag as bag');
+    const player = gameState.players.find(thisPlayer => { return thisPlayer.id == bagWrapper.playerId });
+    bagWrapper.bag = structuredClone(player.moneyBag);
   }
 }
 function onBuyTileClicked(eventData, gameState, notifications, userObj){
     gameState.tileToOwnerMap[gameState.selectedTile.id] = gameState.selectedPlayer.id;
+    
+    logger.info("onBuyTileClicked: Proceeding with ", { 
+      tileId: gameState.selectedTile.id, toPlayerId: gameState.selectedPlayer.id 
+    });
     const roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.tileToOwnerMap = structuredClone(gameState.tileToOwnerMap);
-    var player = gameState.selectedPlayer;
-    var tile = gameState.selectedTile;
-    
+
+    const player = gameState.selectedPlayer;
+    const tile = gameState.selectedTile;   
     const message = `Player ${player.name} bought tile ${tile.name}!`;
     roomObjForMerge.notifications = notifications;
-    roomObjForMerge.notifications.push(message);
+    roomObjForMerge.notifications.unshift(message);
     return roomObjForMerge;
 }
 function onAddBoothClicked(eventData, gameState, notifications, userObj){
-    var booths = gameState.tileToBoothMap[gameState.selectedTile.id] || 0;
+    const booths = gameState.tileToBoothMap[gameState.selectedTile.id] || 0;
     if(booths >= 2) {
       const message = `Tile ${tile.name} already has 2 tiles!`;
+      
+      logger.info("onAddBoothClicked: Proceeding with ", { selTileId: gameState.selectedTile.id, oriBoothCount: booths });
       const roomObjForMerge = {};
       roomObjForMerge.notifications = notifications;
-      roomObjForMerge.notifications.push(message);
+      roomObjForMerge.notifications.unshift(message);
       return roomObjForMerge;
     } else {
-      gameState.tileToBoothMap[gameState.selectedTile.id] = booths + 1;
+      let newBoothCount = booths + 1;
+      gameState.tileToBoothMap[gameState.selectedTile.id] = newBoothCount;
+      
+      logger.info("onAddBoothClicked: Proceeding with ", { selTileId: gameState.selectedTile.id, newBoothCount });
       const roomObjForMerge = {};
       roomObjForMerge.gameState = {};
       roomObjForMerge.gameState.tileToBoothMap = gameState.tileToBoothMap;
-      var player = gameState.selectedPlayer;
-      var tile = gameState.selectedTile;
+
+      const player = gameState.selectedPlayer;
+      const tile = gameState.selectedTile;
       const message = `Player ${player.name} added booth on tile ${tile.name}!`;
       roomObjForMerge.notifications = notifications;
-      roomObjForMerge.notifications.push(message);
+      roomObjForMerge.notifications.unshift(message);
       return roomObjForMerge;
     }
 }
@@ -186,28 +248,38 @@ function onStartGameClicked(eventData, gameState, notifications, userObj){
     }else{
         gameState.status = 'ACTIVE';
     }
+
+    logger.info("onStartGameClicked: Proceeding with ", { 
+      status: gameState.status, playersCountForCheck: gameState.players.length 
+    });
     const roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.status = gameState.status;
     return roomObjForMerge;
 }
 function onShowTallyClicked(eventData, gameState, notifications, userObj){
     gameState.status = 'SHOW_TALLY';
+
+    logger.info("onShowTallyClicked: Proceeding with ", { status: gameState.status });
     const roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.status = gameState.status;
     return roomObjForMerge;
 }
-function onTallyClosed(){
+function onTallyClosed(eventData, gameState, notifications, userObj){
     if(gameState.players.length < 2){
         gameState.status = 'ADD_PLAYER';
     }else{
         gameState.status = 'ACTIVE';
     }
+    
+    logger.info("onTallyClosed: Proceeding with ", { 
+      status: gameState.status, playersCountForCheck: gameState.players.length 
+    });
     const roomObjForMerge = { gameState: {} };
     roomObjForMerge.gameState.status = gameState.status;
     return roomObjForMerge;
 }
 function onPlayerAdded({playerColor}, gameState, notifications, userObj){
-    var player = {
+    const player = {
         id: userObj.userId,
         name: userObj.userName,
         color: playerColor,
@@ -226,18 +298,23 @@ function onPlayerAdded({playerColor}, gameState, notifications, userObj){
         gameState.status = 'ACTIVE';
     }
     const message = `Player ${player.name} added.`;
+    
+    logger.info("onPlayerAdded: Proceeding with ", { 
+      player, playersLen: gameState.players.length, playerTileId: 
+      gameState.playerToTileMap[player.id], gameSelPlayer: gameState.selectedPlayer, gameStatus: gameState.status
+     });
     const roomObjForMerge = { gameState: {}, notifications };
     roomObjForMerge.gameState.players = gameState.players;
     roomObjForMerge.gameState.playerToTileMap = gameState.playerToTileMap;
     roomObjForMerge.gameState.selectedPlayer = gameState.selectedPlayer;
     roomObjForMerge.gameState.status = gameState.status;
-    roomObjForMerge.notifications.push(message);
+    roomObjForMerge.notifications.unshift(message);
     return roomObjForMerge;
 }
 
 function postOnlyNotificationMessage(message, notifications){
   const roomObjForMerge = { notifications };
-  roomObjForMerge.notifications.push(message);
+  roomObjForMerge.notifications.unshift(message);
   return roomObjForMerge;
 }
 
@@ -275,7 +352,19 @@ function handleEventInner(eventName, eventData, gameState, notifications, userOb
   return roomObjForMerge;
 }
 
+/** Since Firebase does a deep-merge, we need this Fn to keep old props nulled-out */
+function nullExistingProps(inObj){
+  return Object.fromEntries(
+    Object.keys(inObj).map(k => [k, null])
+  );
+}
+
 exports.handleEvent = async function(eventName, eventData, roomObj, userObj){
+    logger.info('Locking..');
+    //Locked in client-side direct db update now.
+    //await db.doc(`rooms/${roomObj.roomId}`).set({ locked:true }, { merge: true });
+    //await sleep(1000);
+
     logger.info('Checking event..', {eventName, userId: userObj.userId});
     let allowed = false;
     const gameState = roomObj.gameState;
@@ -314,6 +403,11 @@ exports.handleEvent = async function(eventName, eventData, roomObj, userObj){
     }
     if(roomObjForMerge){
       logger.info('Saving..');
+      roomObjForMerge.locked = false;
       await db.doc(`rooms/${roomObj.roomId}`).set(roomObjForMerge, { merge: true });
     }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

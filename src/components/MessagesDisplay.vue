@@ -1,13 +1,13 @@
 <template>
     <div class="my-msg-display">
         <div class="my-msg-display-title">
-            <span class="func-flex-grow"><b>Game Activity:</b></span>
+            <span class="func-flex-grow my-center-big-font"><b>Game Activity:</b></span>
             <button @click="onAddPlayerClick">Add Player</button>
             <!-- <button @click="onStartGame">Start Game</button> -->
             <button @click="onShowTally">Show Tally</button>
             <!-- <button @click="onResetGame">Reset Game</button> -->
         </div>
-        <select size="10">
+        <select size="10" ref="messagesList">
             <option v-for="(message, idx) in messages" :key="idx">{{ message }}</option>
         </select>
     </div>
@@ -34,6 +34,18 @@ export default {
         },
         onResetGame(){
             eventBus.emit('resetGameClicked');
+        },
+        scrollToTopMessage() {
+            console.log('Scrolling..', this.$refs.messagesList);
+            this.$nextTick(() => {
+                const el = this.$refs.messagesList;
+                if (el) el.scrollTop = 0;
+            });
+        }
+    },
+    watch: {
+        messages(){
+            this.scrollToTopMessage();
         }
     }
 }

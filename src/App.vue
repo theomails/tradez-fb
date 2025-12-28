@@ -123,6 +123,7 @@ html, body{
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-image: linear-gradient(-22deg, rgb(247, 167, 143), rgb(253, 235, 130));
 }
 *, *:before, *:after {
   box-sizing: inherit;
@@ -132,21 +133,24 @@ html, body{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  background-image: linear-gradient(-22deg, rgb(247, 167, 143), rgb(253, 235, 130));
   margin: 0;
   padding: 0;
   font-size: 0.8em;
 }
 .my-game-board button{
+  opacity: 0.9;
   background-color: white;
   border: 0px solid #bbb;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  border-radius: 6px;
   cursor: pointer;
   padding: 5px 10px;
 }
 .my-game-board button:disabled{
   color: #ddd;
+}
+.my-game-board button:hover{
+  opacity: 1;
 }
 .func-flex-grow{
     flex: 1;

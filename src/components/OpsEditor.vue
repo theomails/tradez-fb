@@ -2,8 +2,11 @@
     <div class="my-ops-editor">
         <span><b>{{ bagWrapper?.name }} gives: </b></span>
         <div class="my-ops-denom-row" v-for="(count, denom) in neatOps" :key="denom">
-            ${{ denom }} x <span class="my-op-edit-item"> 
-                <button @click="onDecrClick(denom)">-</button> {{ count }} <button @click="onIncrClick(denom)">+</button> </span> = ${{ denom * count }}
+            ${{ denom }} x <div class="my-op-edit-item func-flex"> 
+                <button class="btn-left" @click="onDecrClick(denom)">-</button>
+                <span class="count">{{ count }}</span>
+                <button class="btn-right" @click="onIncrClick(denom)">+</button>
+            </div> = ${{ denom * count }}
         </div>
     </div>
 </template>
@@ -34,13 +37,35 @@ export default {
 .my-ops-editor{
     padding: 10px 20px 20px 20px;
     margin: 10px 0px;
-    background-color: rgba(255, 255, 255, 0.35);    
+    background-color: rgba(255, 255, 255, 0.5);    
 }
-.my-op-edit-item{
+.my-op-edit-item.func-flex{
+    display: inline;
     margin: 0px 10px;
 }
 .my-op-edit-item > button{
     margin: 3px 10px;
-    padding: 3px 20px;
+    padding: 3px 10px;
+    box-shadow: none;
+}
+.my-op-edit-item button.btn-left{
+    margin-right: 0px;
+    border: 1px solid lightgray;
+    border-radius: 0px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+.my-op-edit-item button.btn-right{
+    margin-left: 0px;
+    border: 1px solid lightgray;
+    border-radius: 0px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+.my-op-edit-item span.count{
+    padding: 3px 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
 }
 </style>

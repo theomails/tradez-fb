@@ -3,7 +3,7 @@
         
         <div class="my-pd-header">
             <div class="my-players-list">
-                <span><b>Players</b></span>
+                <span class="my-center-big-font"><b>Players</b></span>
                 <div class="my-player-in-list" 
                         v-for="player in gameState.players" :key="player.id"
                         :style="{backgroundColor: player.color }"
@@ -15,13 +15,17 @@
 
             <div class="my-player-roll">
                 <button v-if="gameState.selectedPlayer" @click="onRollClick" >Roll dice for <b>{{ gameState.selectedPlayer.name }}</b></button>
-                <span class="func-flex-grow my-dice-value">{{ gameState.currentRolledDice }}</span>
+                <div class="func-flex-grow my-dice-outer" :class="{'my-dice-inactive': !gameState.currentRolledDice}">
+                    <div class="my-dice-value">
+                        <span>{{ gameState.currentRolledDice }}</span>
+                    </div>
+                </div>
                 <button @click="onMoveClick" :disabled="!gameState.currentRolledDice">Move!</button>
             </div>            
         </div>
 
-        <div class="my-player-holdings">
-            <span>{{ gameState.selectedPlayer.name }}'s moneys:</span>
+        <div class="my-player-holdings my-center-big-font">
+            <span>{{ gameState.selectedPlayer.name }}'s tally:</span>
             <BagDisplay :bag="gameState.selectedPlayer.moneyBag"></BagDisplay>
             <PropertyDisplay :player="gameState.selectedPlayer" :gameState="gameState" :gameData="gameData"></PropertyDisplay>
         </div>
@@ -83,8 +87,25 @@ export default{
     display: inline-flex;
     align-items: center;
 }
+.my-dice-inactive .my-dice-value {
+    display: none;
+    opacity: 0.3;
+    font-weight: normal;
+}
 .my-dice-value{
-    padding: 0px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;    
+
+  font-size: 1.5em;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  margin: auto;
+  border: 1px solid lightgray;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
 .my-player-in-list.my-sel-player{
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -92,6 +113,6 @@ export default{
 }
 .my-player-holdings{
     padding: 5px 10px;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 </style>

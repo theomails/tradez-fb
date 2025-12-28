@@ -1,5 +1,8 @@
 <template>
     <div class="my-game-board" v-if="localGameState">
+        <div class="my-disable-overlay" v-if="localRoomObj.locked">
+            Proccessing...
+        </div>
         <AddPlayerPane :gameState="localGameState" :user="localUser"></AddPlayerPane>
         <TallyPane :gameState="localGameState" :gameData="gameData"></TallyPane>
         <div class="my-gb-top">
@@ -129,6 +132,22 @@ export default {
 }
 </script>
 <style>
+.my-disable-overlay{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    top: 0px;
+    left:0px;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(50, 50, 50, 0.6);
+    color: white;
+    font-size: 1.3em;
+    z-index: 100;
+}
 .my-game-board{
     width: 100vw;
     height: 100vh;

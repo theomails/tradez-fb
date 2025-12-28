@@ -126,6 +126,9 @@ export default {
 .my-tile.my-tile-selected{
     border: 2px solid blue;
 }
+.my-tile-expanded .my-tile.my-tile-selected{
+    font-size: 1.2em;
+}
 .my-tile-title{
     margin:-7px; 
     margin-bottom: 10px; 

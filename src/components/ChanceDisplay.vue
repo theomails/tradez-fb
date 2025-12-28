@@ -1,12 +1,12 @@
 <template>
     <div class="my-chance-display">
         <div class="my-chance-base">
-            <span class="my-chance-title"><b>Chance</b></span>
-            <span class="func-flex-grow">Available chance cards #{{ gameState.availableChanceCards.length }}</span>
+            <span class="my-chance-title my-center-big-font"><b>Chance</b></span>
+            <span class="func-flex-grow my-center-big-font">Available chance cards #{{ gameState.availableChanceCards.length }}</span>
             <button @click="onPickCardClick" :disabled="gameState.selectedChanceCard" >Pick a Card</button>
         </div>
         <div class="my-chance-current" v-if="gameState.selectedChanceCard">
-            <span>{{ gameState.selectedChanceCard }}</span>
+            <span class="my-center-big-font">{{ gameState.selectedChanceCard }}</span>
             <button @click="onCloseCardClick">Close</button>
         </div>
     </div>
@@ -50,6 +50,6 @@ export default{
     display: flex;
     justify-content: space-between;
     padding: 15px 10px;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 </style>

@@ -15,6 +15,11 @@ export default {
     },
     async postCommandToRoom(userId, roomId, eventName, eventArgs){
         console.log('Backend Helper :: postCommandToRoom userId: ' + userId + ' roomId:' + roomId + ' command: ' + eventName, eventArgs);
-        await callFnWithAuth('processGameCommand', { userId, roomId, eventName, eventArgs });
+        await dbservice.lockRoomForAction(roomId);
+        try{
+            await callFnWithAuth('processGameCommand', { userId, roomId, eventName, eventArgs });
+        } catch(e) {
+            await dbservice.lockRoomForAction(roomId, 'unlock');
+        }
     },    
 }

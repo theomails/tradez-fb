@@ -50,11 +50,14 @@ export default{
     height: 100%;
 }
 .my-center-panels > div > div{
-    background-color: rgba(242, 220, 178, 1) !important;
+    background-color: rgba(255, 255, 255, 0.4) !important;
     margin: 3px 10px;
 }
 .my-center-panels > div > div {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+.my-center-panels .my-center-big-font {
+    font-size: 1.2em;
 }
 .my-center-right{
     display: flex;

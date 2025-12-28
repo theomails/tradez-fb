@@ -31,6 +31,18 @@ function neatViewOfBag(bag){
     return resultBag;
 }
 
+function neatViewOfBagFiltered(bag){
+    bag = bag || {};
+    var denominations = getPossibleDenominations();
+    var resultBag = {};
+    denominations.forEach(note => {
+        if(bag[note]>0){
+            resultBag[note] = bag[note] || 0;
+        }
+    });
+    return resultBag;
+}
+
 function transferInline(fromBag, toBag, ops){
     Object.keys(ops).forEach(key => {
         if(ops[key] && ops[key]>0){
@@ -48,4 +60,4 @@ function transferInline(fromBag, toBag, ops){
     });
 }
 
-module.exports = {getDefaultPlayerMoneyBag, getDefaultBankMoneyBag, getPossibleDenominations, neatViewOfBag, transferInline};
+module.exports = {getDefaultPlayerMoneyBag, getDefaultBankMoneyBag, getPossibleDenominations, neatViewOfBag, neatViewOfBagFiltered, transferInline};

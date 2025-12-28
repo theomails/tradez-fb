@@ -1,10 +1,10 @@
 <template>
     <div class="my-main-bags">
-        <div class="my-main-bag my-main-bag-1">
+        <div class="my-main-bag my-main-bag-1 my-center-big-font">
             <span>Bank's moneys</span>
             <BagDisplay :bag="bankBagForView" :gameState="gameState"></BagDisplay>            
         </div>
-        <div class="my-main-bag">
+        <div class="my-main-bag my-center-big-font">
             <span>Uncle Penny Bag's Loose Change</span>
             <BagDisplay :bag="uncleBagForView" :gameState="gameState"></BagDisplay>
         </div>
@@ -37,7 +37,7 @@ export default{
 <style>
 .my-main-bag{
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 .my-main-bags{
     padding: 5px 10px;
