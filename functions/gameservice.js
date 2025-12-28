@@ -218,7 +218,7 @@ function onBuyTileClicked(eventData, gameState, notifications, userObj){
 function onAddBoothClicked(eventData, gameState, notifications, userObj){
     const booths = gameState.tileToBoothMap[gameState.selectedTile.id] || 0;
     if(booths >= 2) {
-      const message = `Tile ${tile.name} already has 2 tiles!`;
+      const message = `Tile ${tile.name} already has 2 booths!`;
       
       logger.info("onAddBoothClicked: Proceeding with ", { selTileId: gameState.selectedTile.id, oriBoothCount: booths });
       const roomObjForMerge = {};
@@ -237,6 +237,33 @@ function onAddBoothClicked(eventData, gameState, notifications, userObj){
       const player = gameState.selectedPlayer;
       const tile = gameState.selectedTile;
       const message = `Player ${player.name} added booth on tile ${tile.name}!`;
+      roomObjForMerge.notifications = notifications;
+      roomObjForMerge.notifications.unshift(message);
+      return roomObjForMerge;
+    }
+}
+function onRemoveBoothClicked(eventData, gameState, notifications, userObj){
+    const booths = gameState.tileToBoothMap[gameState.selectedTile.id] || 0;
+    if(booths < 1) {
+      const message = `Tile ${tile.name} has no booths!`;
+      
+      logger.info("onRemoveBoothClicked: Proceeding with ", { selTileId: gameState.selectedTile.id, oriBoothCount: booths });
+      const roomObjForMerge = {};
+      roomObjForMerge.notifications = notifications;
+      roomObjForMerge.notifications.unshift(message);
+      return roomObjForMerge;
+    } else {
+      let newBoothCount = booths - 1;
+      gameState.tileToBoothMap[gameState.selectedTile.id] = newBoothCount;
+      
+      logger.info("onRemoveBoothClicked: Proceeding with ", { selTileId: gameState.selectedTile.id, newBoothCount });
+      const roomObjForMerge = {};
+      roomObjForMerge.gameState = {};
+      roomObjForMerge.gameState.tileToBoothMap = gameState.tileToBoothMap;
+
+      const player = gameState.selectedPlayer;
+      const tile = gameState.selectedTile;
+      const message = `Player ${player.name} removed booth on tile ${tile.name}!`;
       roomObjForMerge.notifications = notifications;
       roomObjForMerge.notifications.unshift(message);
       return roomObjForMerge;
@@ -264,14 +291,22 @@ function onShowTallyClicked(eventData, gameState, notifications, userObj){
     roomObjForMerge.gameState.status = gameState.status;
     return roomObjForMerge;
 }
-function onTallyClosed(eventData, gameState, notifications, userObj){
+function onShowInstructionsClicked(eventData, gameState, notifications, userObj){
+    gameState.status = 'SHOW_INSTRUCTIONS';
+
+    logger.info("onShowInstructionsClicked: Proceeding with ", { status: gameState.status });
+    const roomObjForMerge = { gameState: {} };
+    roomObjForMerge.gameState.status = gameState.status;
+    return roomObjForMerge;
+}
+function onTallyOrInstructionsClosed(eventData, gameState, notifications, userObj){
     if(gameState.players.length < 2){
         gameState.status = 'ADD_PLAYER';
     }else{
         gameState.status = 'ACTIVE';
     }
     
-    logger.info("onTallyClosed: Proceeding with ", { 
+    logger.info("onTallyOrInstructionsClosed: Proceeding with ", { 
       status: gameState.status, playersCountForCheck: gameState.players.length 
     });
     const roomObjForMerge = { gameState: {} };
@@ -340,12 +375,18 @@ function handleEventInner(eventName, eventData, gameState, notifications, userOb
     roomObjForMerge = onBuyTileClicked(eventData, gameState, notifications, userObj);
   else if(eventName == 'addBoothClicked')
     roomObjForMerge = onAddBoothClicked(eventData, gameState, notifications, userObj);
+  else if(eventName == 'removeBoothClicked')
+    roomObjForMerge = onRemoveBoothClicked(eventData, gameState, notifications, userObj);
   else if(eventName == 'startGameClicked')
     roomObjForMerge = onStartGameClicked(eventData, gameState, notifications, userObj);
   else if(eventName == 'showTallyClicked')
     roomObjForMerge = onShowTallyClicked(eventData, gameState, notifications, userObj);
   else if(eventName == 'tallyClosed')
-    roomObjForMerge = onTallyClosed(eventData, gameState, notifications, userObj);
+    roomObjForMerge = onTallyOrInstructionsClosed(eventData, gameState, notifications, userObj);
+  else if(eventName == 'showInstructionsClicked')
+    roomObjForMerge = onShowInstructionsClicked(eventData, gameState, notifications, userObj);
+  else if(eventName == 'instructionsClosed')
+    roomObjForMerge = onTallyOrInstructionsClosed(eventData, gameState, notifications, userObj);
   else if(eventName == 'playerAdded')
     roomObjForMerge = onPlayerAdded(eventData, gameState, notifications, userObj); //Move them out of Game events
 

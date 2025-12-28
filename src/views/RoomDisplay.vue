@@ -93,7 +93,7 @@ export default{
     width: 100vw;
     height: 100vh;
     background-color: rgba(247, 232, 205, 0.6);
-    z-index: 1000;
+    z-index: 50;
     font-size: 1em;
 }
 </style>

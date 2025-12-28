@@ -1,10 +1,13 @@
 <template>
     <div class="my-game-board" v-if="localGameState">
         <div class="my-disable-overlay" v-if="localRoomObj.locked">
-            Proccessing...
+            <span>Proccessing... </span>
+            <span>&nbsp;</span>
+            <a v-if="roomObj?.owner?.userId == localUser?.userId" @click="onUnlock">Unlock</a>
         </div>
         <AddPlayerPane :gameState="localGameState" :user="localUser"></AddPlayerPane>
         <TallyPane :gameState="localGameState" :gameData="gameData"></TallyPane>
+        <InstructionsPane :gameState="localGameState" :gameData="gameData"></InstructionsPane>
         <div class="my-gb-top">
             <TileStrip direction="horizontal" :gameData="gameData" :gameState="localGameState" 
                 :fromTileIdx="16" :toTileIdx="26"></TileStrip>
@@ -15,8 +18,8 @@
                     :fromTileIdx="15" :toTileIdx="11"></TileStrip>
             </div>
             <div class="my-gb-center">
-                <CenterPanels :gameState="localGameState" :messages="localNotifications"
-                    :gameData="gameData"></CenterPanels>
+                <CenterPanels :gameState="localGameState" :messages="localNotifications" :owner="roomObj?.owner" :roomId="roomObj?.roomId"
+                    :gameData="gameData"  :user="localUser"></CenterPanels>
             </div>
             <div class="my-gb-right">
                 <TileStrip direction="vertical" :gameData="gameData" :gameState="localGameState" 
@@ -37,6 +40,8 @@ import TallyPane from './TallyPane.vue';
 import data from "@/data.js";
 import {eventBus} from '@/main.js';
 import backendhelper from '@/backendhelper.js';
+import InstructionsPane from './InstructionsPane.vue';
+import dbservice from "@/dbservice.js";
 
 export default {
     props: ['roomObj', 'localUser'],
@@ -52,6 +57,9 @@ export default {
         };
     },
     methods:{
+        async onUnlock(){
+            await dbservice.lockRoomForAction(this.roomObj?.roomId, 'unlock');
+        },
         postMessage(msg){
             if(!msg) return;
             this.$notify({
@@ -107,10 +115,13 @@ export default {
             this.setupEventHandler('transferClicked');
             this.setupEventHandler('buyTileClicked');
             this.setupEventHandler('addBoothClicked');
+            this.setupEventHandler('removeBoothClicked');
             this.setupEventHandler('addPlayerClicked'); //Move them out of Game events
             this.setupEventHandler('startGameClicked');
             this.setupEventHandler('showTallyClicked');
             this.setupEventHandler('tallyClosed');
+            this.setupEventHandler('showInstructionsClicked');
+            this.setupEventHandler('instructionsClosed');
             this.setupEventHandler('playerAdded'); //Move them out of Game events
             this.setupEventHandler('addPlayerCancelled'); //Move them out of Game events
 
@@ -123,7 +134,8 @@ export default {
         TileStrip,
         CenterPanels,
         AddPlayerPane,
-        TallyPane
+        TallyPane,
+        InstructionsPane
     },
     errorCaptured(err, vm, info) {
         console.error('captured', err, info);
@@ -146,7 +158,13 @@ export default {
     background-color: rgba(50, 50, 50, 0.6);
     color: white;
     font-size: 1.3em;
-    z-index: 100;
+    z-index: 300;
+}
+.my-disable-overlay a{
+    display: inline;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }
 .my-game-board{
     width: 100vw;

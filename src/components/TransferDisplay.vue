@@ -4,7 +4,7 @@
             <select class="my-transfer-from" v-model="fromBagId">
                 <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
             </select>
-            &nbsp;to&nbsp;
+            <span class="my-center-big-font">&nbsp;to&nbsp;</span>
             <select class="my-transfer-to" v-model="toBagId">
                 <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
             </select>

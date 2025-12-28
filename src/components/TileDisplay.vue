@@ -3,8 +3,9 @@
         <Tile :tile="gameState.selectedTile" :gameState="gameState" mode="display"></Tile>
         <div class="my-tile-expanded-actions">
             <button @click="onJumpHereClick">Jump Here</button>
-            <button :disabled="!gameState.selectedTile.buyable" @click="onBuyTileClick">Buy</button>
-            <button :disabled="!gameState.selectedTile.buyable" @click="onAddBoothClick">Add Booth</button>
+            <button :disabled="!selectedTileBuyable" @click="onBuyTileClick">Buy</button>
+            <button :disabled="!selectedTileBuyable || !iOwnSelectedTile || selectedTileBoothsCount>=2" @click="onAddBoothClick">Add Booth</button>
+            <button :disabled="!selectedTileBuyable || !iOwnSelectedTile || selectedTileBoothsCount<1" @click="onRemoveBoothClick">Remove Booth</button>
         </div>
     </div>
 </template>
@@ -13,7 +14,7 @@ import Tile from './Tile.vue';
 import {eventBus} from '@/main.js';
 
 export default{
-    props: ["gameState"],
+    props: ["gameState", "owner", "user"],
     methods:{
         onJumpHereClick(){
             eventBus.emit('jumpHereClicked');
@@ -23,6 +24,20 @@ export default{
         },
         onAddBoothClick(){
             eventBus.emit('addBoothClicked');
+        },
+        onRemoveBoothClick(){
+            eventBus.emit('removeBoothClicked');
+        }
+    },
+    computed: {
+        selectedTileBuyable(){
+            return this.gameState?.selectedTile?.buyable;
+        },
+        iOwnSelectedTile(){
+            return (this.gameState?.tileToOwnerMap?.[this.gameState.selectedTile.id] || '') == this.user?.userId;
+        },
+        selectedTileBoothsCount(){
+            return this.gameState?.tileToBoothMap?.[this.gameState.selectedTile.id] || 0;
         }
     },
     components:{

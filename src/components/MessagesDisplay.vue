@@ -2,9 +2,11 @@
     <div class="my-msg-display">
         <div class="my-msg-display-title">
             <span class="func-flex-grow my-center-big-font"><b>Game Activity:</b></span>
-            <button @click="onAddPlayerClick">Add Player</button>
+            <button @click="onAddPlayerClick" disabled="meAddedAsPlayer">Add Player</button>
             <!-- <button @click="onStartGame">Start Game</button> -->
             <button @click="onShowTally">Show Tally</button>
+            <button @click="onShowInstructions">🛈</button>
+            <!-- <button @click="onUnlock" v-if="owner.userId == user.userId">🔓</button> -->
             <!-- <button @click="onResetGame">Reset Game</button> -->
         </div>
         <select size="10" ref="messagesList">
@@ -16,7 +18,7 @@
 import {eventBus} from '@/main.js';
 
 export default {
-    props: ['gameState', 'messages'],
+    props: ['user', 'gameState', 'messages', 'roomId', 'owner'],
     data(){
         return {
 
@@ -32,6 +34,9 @@ export default {
         onShowTally(){
             eventBus.emit('showTallyClicked');
         },
+        onShowInstructions(){
+            eventBus.emit('showInstructionsClicked');
+        },
         onResetGame(){
             eventBus.emit('resetGameClicked');
         },
@@ -41,6 +46,18 @@ export default {
                 const el = this.$refs.messagesList;
                 if (el) el.scrollTop = 0;
             });
+        }
+    },
+    computed: {
+        meAddedAsPlayer(){
+            const players = this.gameState?.players;
+            if(players){
+                const mePlayer = players.find(player => player.id == this.user.userId);
+                if(mePlayer){
+                    return true;
+                }
+            }
+            return false;
         }
     },
     watch: {
