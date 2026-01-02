@@ -1,7 +1,7 @@
 <template>
     <div class="my-players-display">
         
-        <div class="my-pd-header">
+        <div class="my-pd-header ">
             <div class="my-players-list">
                 <span class="my-center-big-font"><b>Players</b></span>
                 <div class="my-player-in-list" 
@@ -67,6 +67,7 @@ export default{
 }
 .my-pd-header{
     display: flex;
+    flex-wrap: wrap;
     margin-bottom: 5px;
 }
 .my-players-list{
