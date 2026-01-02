@@ -72,6 +72,7 @@ export default{
 }
 .my-players-list{
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
     padding: 10px;
 }

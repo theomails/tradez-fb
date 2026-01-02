@@ -150,6 +150,7 @@ export default {
     padding-bottom: 3px;
 
     display: flex;
+    flex-wrap: wrap;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
