@@ -17,7 +17,7 @@
                 <button v-if="gameState.selectedPlayer" @click="onRollClick" >Roll dice for <b>{{ gameState.selectedPlayer.name }}</b></button>
                 <div class="func-flex-grow my-dice-outer" :class="{'my-dice-inactive': !gameState.currentRolledDice}">
                     <div class="my-dice-value">
-                        <span>{{ gameState.currentRolledDice }}</span>
+                        <span>{{ gameState.currentRolledDice ? gameState.currentRolledDice : '-' }}</span>
                     </div>
                 </div>
                 <button @click="onMoveClick" :disabled="!gameState.currentRolledDice">Move!</button>
@@ -89,12 +89,12 @@ export default{
     display: inline-flex;
     align-items: center;
 }
-.my-dice-inactive .my-dice-value {
-    display: none;
+.my-dice-inactive .my-dice-value span{
     opacity: 0.3;
     font-weight: normal;
+    color: #ccc;
 }
-.my-dice-value{
+.my-dice-value span{
   display: flex;
   align-items: center;
   justify-content: center;    
@@ -109,9 +109,13 @@ export default{
   background-color: white;
   box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
+.my-dice-value  {
+    margin: 0px 3px;
+}
 .my-player-in-list.my-sel-player{
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     font-weight: bold;
+    border: 2px solid blue;
 }
 .my-player-holdings{
     padding: 5px 10px;

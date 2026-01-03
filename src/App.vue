@@ -137,6 +137,15 @@ html, body{
   padding: 0;
   font-size: 0.8em;
 }
+.my-transfer-dropdown {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 0.8em;
+}
+.my-transfer-dropdown * {
+  font-size: 12px;
+}
 .my-game-board button{
   opacity: 0.9;
   background-color: white;

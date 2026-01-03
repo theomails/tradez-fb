@@ -1,6 +1,6 @@
 <template>
     <div class="my-msg-display">
-        <div class="my-msg-display-title">
+        <div class="my-msg-display-title func-flex">
             <span class="func-flex-grow my-center-big-font"><b>Game Activity:</b></span>
             <button @click="onAddPlayerClick" disabled="meAddedAsPlayer">Add Player</button>
             <!-- <button @click="onStartGame">Start Game</button> -->
@@ -76,9 +76,6 @@ export default {
     margin: 10px;
     border-radius: 4px;
     background-color: rgb(116, 239, 214);
-}
-.my-msg-display-title{
-    display: flex;
 }
 .my-msg-display-title button{
     margin-left: 10px;

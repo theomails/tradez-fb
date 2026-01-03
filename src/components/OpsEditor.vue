@@ -2,7 +2,7 @@
     <div class="my-ops-editor">
         <span><b>{{ bagWrapper?.name }} gives: </b></span>
         <div class="my-ops-denom-row" v-for="(count, denom) in neatOps" :key="denom">
-            ${{ denom }} x <div class="my-op-edit-item func-flex"> 
+            ${{ denom }} x <div class="my-op-edit-item"> 
                 <button class="btn-left" @click="onDecrClick(denom)">-</button>
                 <span class="count">{{ count }}</span>
                 <button class="btn-right" @click="onIncrClick(denom)">+</button>
@@ -37,15 +37,21 @@ export default {
 .my-ops-editor{
     padding: 10px 20px 20px 20px;
     margin: 10px 0px;
+    margin-bottom: 1px;
     background-color: rgba(255, 255, 255, 0.5);    
 }
-.my-op-edit-item.func-flex{
+.my-ops-denom-row{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.my-op-edit-item{
     display: inline;
-    margin: 0px 10px;
 }
 .my-op-edit-item > button{
-    margin: 3px 10px;
-    padding: 3px 10px;
+    margin: 3px 5px;
+    padding: 3px 5px;
     box-shadow: none;
 }
 .my-op-edit-item button.btn-left{

@@ -187,7 +187,7 @@ export default{
 }
 .func-flex{
     display: flex;
-    align-items: first baseline;
+    align-items: center;
 }
 .func-flex-vertical{
     display: flex;

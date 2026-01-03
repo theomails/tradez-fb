@@ -1,13 +1,14 @@
 <template>
     <div class="my-transfer-display">
+        <div class="my-center-big-font" style="margin-bottom: 5px; margin-left: 3px;"><b>Money Transfer</b></div>
         <div class="my-transfer-header func-flex">
-            <select class="my-transfer-from" v-model="fromBagId">
-                <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
-            </select>
+            <el-select class="my-transfer-from" v-model="fromBagId" size="small" popper-class="my-transfer-dropdown">
+                <el-option v-for="bagOption in bagOptions" :key="bagOption.id" :label="bagOption.name" :value="bagOption.id">{{ bagOption.name }}</el-option>
+            </el-select>
             <span class="my-center-big-font">&nbsp;to&nbsp;</span>
-            <select class="my-transfer-to" v-model="toBagId">
-                <option v-for="bagOption in bagOptions" :key="bagOption.id" :value="bagOption.id">{{ bagOption.name }}</option>
-            </select>
+            <el-select class="my-transfer-to" v-model="toBagId" size="small" popper-class="my-transfer-dropdown">
+                <el-option v-for="bagOption in bagOptions" :key="bagOption.id" :label="bagOption.name" :value="bagOption.id">{{ bagOption.name }}</el-option>
+            </el-select>
         </div>
         <div class="my-transfer-ops my-center-big-font">
             <OpsEditor :bagWrapper="getWrapperForBagId(fromBagId)" :neatOps="getNeatOps(fromOps)"
