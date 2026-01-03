@@ -80,7 +80,7 @@ export default{
     font-size: 1.2em;
     padding: 5px 10px;
     border: 1px solid #eee;
-    margin: 0px 10px;
+    margin: 0px 5px;
     cursor: pointer;
     box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
