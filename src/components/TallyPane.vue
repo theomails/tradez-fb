@@ -6,7 +6,7 @@
             </div>
             <div class="func-popup-content">
                 <div v-for="player in gameState.players" :key="player.id" class="my-player-holdings">
-                    <span>{{ player.name }}'s moneys:</span>
+                    <span>{{ player.name }}'s tally:</span>
                     <BagDisplay :bag="player.moneyBag"></BagDisplay>
                     <PropertyDisplay :player="player" :gameState="gameState" :gameData="gameData"></PropertyDisplay>
                 </div>

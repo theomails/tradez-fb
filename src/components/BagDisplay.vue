@@ -1,9 +1,10 @@
 <template>
-    <div class="my-bag-holdings">
-        <span>💵 </span>
+    <div class="my-bag-holdings func-flex">
+        <span>💵 Moneys: </span>
         <span v-for="(num, denom, idx) in bagForView" :key="denom">
             {{ `\$${denom} x ${num}` + separatorCalc(idx) }}
         </span>
+        <span class='func-flex-grow'></span>
         <span class="my-bag-total">  Total: ${{ bagTotal }}</span>
     </div>
 </template>

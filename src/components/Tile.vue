@@ -1,8 +1,8 @@
 <template>
-    <div class="my-tile" :class="{'my-tile-selected':isThisTileSelected}" @click="onTileClick()">
+    <div class="my-tile" :class="{'my-tile-selected':isThisTileSelected, 'rainbow-border':isThisTileSelected}" @click="onTileClick()">
         <div class="my-tile-title" 
-            :style="{backgroundColor: getBgColor(tile.color), color: getTextColor(tile.color)}"
-            :title="tile.color"><b>{{ tile.name }}</b>
+            :style="{backgroundColor: getBgColor(tile.color), color: getTextColor(tile.color)}">
+            <b>{{ tile.name }}</b>
             <div v-if="thisTileOwnerName || thisTileBoothsCount">
                 <span>{{ thisTileOwnerName }}</span>&nbsp;
                 <span v-if="thisTileBoothsCount">Booths: {{ thisTileBoothsCount }}</span>
@@ -18,7 +18,7 @@
         <div class="my-tile-players" v-if="mode == 'strip'" >
             <div class="my-player-in-tile" 
                     v-for="player in playersOnThisTile" :key="player.id"
-                    :class="{'my-player-in-tile-selected': player.id==gameState.selectedPlayer.id}" 
+                    :class="{'my-player-in-tile-selected': player.id==gameState.selectedPlayer.id, 'rainbow-border': player.id==gameState.selectedPlayer.id}" 
                     :style="{backgroundColor: player.color }"
                 >{{ player.name }}</div>
         </div>
@@ -125,6 +125,10 @@ export default {
 }
 .my-tile.my-tile-selected{
     border: 2px solid blue;
+    box-shadow:
+    rgba(6, 24, 44, 0.3) 0px 0px 4px 0.25px,
+    rgba(6, 24, 44, 0.4) 0px 3px 6px -2px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 .my-tile-expanded .my-tile.my-tile-selected{
     font-size: 1.2em;
@@ -166,7 +170,10 @@ export default {
     padding: 0px 5px;
     opacity: 1;
     cursor: pointer;
-    box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
+    box-shadow:
+    rgba(6, 24, 44, 0.3) 0px 0px 4px 0.25px,
+    rgba(6, 24, 44, 0.4) 0px 3px 6px -2px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px inset;
 }
 .my-player-in-tile-selected{
     border: 1px solid white;

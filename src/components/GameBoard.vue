@@ -134,7 +134,7 @@ export default {
     left:0px;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(50, 50, 50, 0.6);
+    background-color: rgba(50, 50, 50, 0.3);
     color: white;
     font-size: 1.3em;
     z-index: 300;

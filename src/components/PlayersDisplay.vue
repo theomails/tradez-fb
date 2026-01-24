@@ -7,7 +7,7 @@
                 <div class="my-player-in-list" 
                         v-for="player in gameState.players" :key="player.id"
                         :style="{backgroundColor: player.color }"
-                        :class="{'my-sel-player': isSelectedPlayer(player)}"
+                        :class="{'my-sel-player': isSelectedPlayer(player), 'rainbow-border': isSelectedPlayer(player)}"
                         @click="onPlayerClick(player)">
                     {{ player.name }}
                 </div>

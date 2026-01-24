@@ -30,7 +30,8 @@ export default {
   name: 'App',
   data(){
     return {
-      localUser: null
+      localUser: null,
+      rainbowBorderNum: 0
     };
   },
   methods:{
@@ -42,6 +43,27 @@ export default {
     },
     checkUserChange(){
       this.localUser = dbservice.getAndSyncLocalUser();
+    },
+    applyNextRainbowColor() {
+      const MAX = 8;
+      const nodes = document.querySelectorAll('.rainbow-border');
+
+      nodes.forEach(el => {
+        // remove any existing rainbow-border-* class
+        el.classList.forEach(cls => {
+          if (cls.startsWith('rainbow-border-')) {
+            el.classList.remove(cls);
+          }
+        });
+
+        // add next border class
+        this.rainbowBorderNum = (this.rainbowBorderNum % MAX) + 1;
+        el.classList.add(`rainbow-border-${this.rainbowBorderNum}`);
+      });
+    },
+    tickForRainbowBorder() {
+      this.applyNextRainbowColor();
+      setTimeout(this.tickForRainbowBorder, 1500);
     }
   },
   watch:{
@@ -51,6 +73,7 @@ export default {
   },
   mounted(){
     this.checkUserChange();
+    this.tickForRainbowBorder();
   },
   components: {
     Notifications
@@ -183,4 +206,33 @@ input:disabled {
   margin-right: 20px;
   z-index: 290;
 }
+#app .rainbow-border {
+  border: 3px solid #d4af37; /* classic gold */
+  transition: border-color 750ms linear;
+}
+#app .rainbow-border-1 {
+  border-color: #c46a63; /* muted rose red */
+}
+#app .rainbow-border-2 {
+  border-color: #c9824a; /* deep peach / amber */
+}
+#app .rainbow-border-3 {
+  border-color: #c9b25c; /* dark warm yellow */
+}
+#app .rainbow-border-4 {
+  border-color: #7fa982; /* muted green */
+}
+#app .rainbow-border-5 {
+  border-color: #5fa3a0; /* deep teal-mint */
+}
+#app .rainbow-border-6 {
+  border-color: #6f8fb8; /* dusty blue (not pure blue) */
+}
+#app .rainbow-border-7 {
+  border-color: #8b79b8; /* muted violet */
+}
+#app .rainbow-border-8 {
+  border-color: #b07a9e; /* dusty magenta */
+}
+
 </style>

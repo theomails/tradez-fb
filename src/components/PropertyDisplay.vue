@@ -1,11 +1,12 @@
 <template>
-    <div class="my-bag-holdings">
-        <span>🏡 </span>
+    <div class="my-bag-holdings func-flex">
+        <span>🏡 Properties: </span>
         <template v-if="playerTileSummaries.length>0">
             <span v-for="summary in playerTileSummaries" :key="summary.tile.id">
                 {{ `[${summary.tile.name} \$${summary.tile.priceOrCharge} ` }}
                 {{ summary.boothCount>0?`+ ${summary.boothCount} booths * \$${summary.tile.priceOrCharge}] `:']' }}
             </span>
+            <span class="func-flex-grow"></span>
             <span v-if="playerTileSummaries.length>0">  Total: ${{ totalValue }}</span>
         </template>
         <span v-else>
