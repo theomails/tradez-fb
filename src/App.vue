@@ -17,12 +17,14 @@
     </div>
 
     <div class="app-body">
+      <Notifications :duration="3000"/>
       <router-view />
     </div>
   </div>
 </template>
 <script>
 import dbservice from '@/dbservice'
+import { Notifications } from '@kyvg/vue3-notification'
 
 export default {
   name: 'App',
@@ -51,6 +53,7 @@ export default {
     this.checkUserChange();
   },
   components: {
+    Notifications
   }
 }
 </script>
@@ -146,6 +149,7 @@ html, body{
 .my-transfer-dropdown * {
   font-size: 12px;
 }
+
 .my-game-board button{
   opacity: 0.9;
   background-color: white;
@@ -166,5 +170,17 @@ html, body{
 }
 input:disabled {
   color: #666;
+}
+
+.vue-notification {
+  border-left: 5px solid #e7a518;
+  background-color: #f0c467;
+  font-size: 1.3em;
+  padding: 15px;
+}
+#app .vue-notification-group {
+  margin-top: 20px;
+  margin-right: 20px;
+  z-index: 290;
 }
 </style>

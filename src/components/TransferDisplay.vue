@@ -110,7 +110,7 @@ export default {
             if(netAmount == 0){
                 return 'Nothing to transfer.';
             }
-            return `Transfering $${netAmount} from ${fromName} to ${toName}`;
+            return `$${netAmount} from ${fromName} to ${toName}`;
         },
         transferNetAmount(){
             var fromAmt = this.getTotal(this.fromOps);

@@ -21,8 +21,7 @@ export default{
             //If roomId is passed as input (path parameter becomes prop), get room details into data
             if(this.roomId){
                 this.$notify({
-                    message: 'Joining room..',
-                    showClose: false,
+                    text: 'Joining room..',
                     type:'success'
                 });
                 try{
@@ -30,16 +29,14 @@ export default{
                     dbservice.listenToRoom(this.roomId, this.onRoomSnapshot);
                 } catch (err) {
                     this.$notify({
-                        message: 'Unable to find a matching room. Please check the link. Redirecting...',
-                        showClose: false,
-                        type:'error',
-                        onClose: ()=>{ this.$router.push({name:'create-room'}); }
-                    });                    
+                        text: 'Unable to find a matching room. Please check the link. Redirecting...',
+                        type:'error'
+                    });             
+                    setTimeout(()=>{ this.$router.push({name:'create-room'}); }, 5000);
                 }
             }else{
                 this.$notify({
-                    message: 'No room to join. Redirecting..',
-                    showClose: false,
+                    text: 'No room to join. Redirecting..',
                     type:'success'
                 });
                 this.$router.push({name:'create-room'});

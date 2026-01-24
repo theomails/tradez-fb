@@ -36,8 +36,7 @@ export default {
         login(){
             //Login
             this.$notify({
-                    message: 'Logging in..',
-                    showClose: false,
+                    text: 'Logging in..',
                     type:'success'
                 });
             dbservice.createOrUpdateLocalUser(this.userName);

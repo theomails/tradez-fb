@@ -1,5 +1,6 @@
 <template>
     <div class="my-game-board" v-if="localGameState">
+        <Notifications group="gameboard" :duration="3000"/> <!-- Has z-index below gameboard disable overlay -->
         <div class="my-disable-overlay" v-if="localRoomObj.locked">
             <span>Proccessing... </span>
             <span>&nbsp;</span>
@@ -42,6 +43,7 @@ import {eventBus} from '@/main.js';
 import backendhelper from '@/backendhelper.js';
 import InstructionsPane from './InstructionsPane.vue';
 import dbservice from "@/dbservice.js";
+import { Notifications } from '@kyvg/vue3-notification';
 
 export default {
     props: ['roomObj', 'localUser'],
@@ -60,21 +62,6 @@ export default {
         async onUnlock(){
             await dbservice.lockRoomForAction(this.roomObj?.roomId, 'unlock');
         },
-        postMessage(msg){
-            if(!msg) return;
-            this.$notify({
-                    message: msg,
-                    type: "info",
-                    top: true,
-                    bottom: false,
-                    left: true,
-                    right: false,
-                    showClose: true,
-                    closeDelay: 4500
-                });
-            this.notificationsUpdating = true;
-            this.localNotifications.unshift(msg);
-        },
         grabRoomFromProps(){
             this.localRoomObj = this.roomObj;
             this.localGameState = this.localRoomObj?.gameState;
@@ -82,15 +69,6 @@ export default {
 
                 this.localNotifications = this.localRoomObj?.notifications;
             }            
-        },
-        publishNewNotifications(localNotifications, inNotifications){
-            if(inNotifications.length > localNotifications.length){
-                const numPublish = inNotifications.length - localNotifications.length;
-                for(let i=(inNotifications.length - numPublish); i<inNotifications.length; i++){
-                    console.log('Posting: ' + inNotifications[i]);
-                    this.postMessage(inNotifications[i]);
-                }
-            }
         },
         setupEventHandler(eventName){
             eventBus.on(eventName, async (eventArgs)=>{
@@ -135,7 +113,8 @@ export default {
         CenterPanels,
         AddPlayerPane,
         TallyPane,
-        InstructionsPane
+        InstructionsPane,
+        Notifications
     },
     errorCaptured(err, vm, info) {
         console.error('captured', err, info);

@@ -43,8 +43,7 @@ export default {
             try{
                 //Create Room
                 this.$notify({
-                        message: 'Creating Room..',
-                        showClose: false,
+                        text: 'Creating Room..',
                         type:'success'
                     });
                 

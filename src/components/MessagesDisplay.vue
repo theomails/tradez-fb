@@ -46,6 +46,22 @@ export default {
                 const el = this.$refs.messagesList;
                 if (el) el.scrollTop = 0;
             });
+        },
+        diffMessagesAndNotify(newMessages, oldMessages){
+            if (!oldMessages) return
+
+            const addedCount = newMessages.length - oldMessages.length
+            if (addedCount <= 0) return
+
+            const addedMessages = newMessages.slice(0, addedCount)
+            addedMessages.forEach(msg => {
+                if(msg){
+                    this.$notify({
+                        group: 'gameboard', 
+                        text: msg
+                    });                    
+                }
+            })            
         }
     },
     computed: {
@@ -61,8 +77,9 @@ export default {
         }
     },
     watch: {
-        messages(){
+        messages(newVal, oldVal){
             this.scrollToTopMessage();
+            this.diffMessagesAndNotify(newVal, oldVal);
         }
     }
 }
